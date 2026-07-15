@@ -1,0 +1,101 @@
+---
+title: "Assignment 1"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Assignment 1: Linear Regression
+
+## Instructions
+
+This assignment is going to test your skills in R and regression analysis. The review slides for both units are going to be **extremely** helpful to you while completing this assignment. Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code and it's against class policy. Email me a question or reach out to a classmate if anything is unclear or you need help!
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed. The assignment should look something like below:
+
+**Question 1 - Text from question 1. (MAKE THIS ONE OF THE HEADER STYLES SO IT'S EASIER TO READ.)**
+
+Code chunk, if applicable.
+
+*Text answering question, if applicable.*
+
+**Question 2 - Text from question 2. (MAKE THIS ONE OF THE HEADER STYLES SO IT'S EASIER TO READ.)**
+
+.... and so on.
+
+## Questions (30 pts total)
+
+The data for this assignment come from a mixed-methods study on young adults' perceptions of their parents' sexual communication with them as a child (e.g., did they have "the talk"?). The data presented are a subset from the larger questionnaire given to participants, who were recruited by convenience sampling, came into a lab, completed a questionnaire, and then an interview. The variables in the dataset are as follows:
+
+-   **Age**: Participant's age (Range: 19-22)
+
+-   **Sex**: Participant's sex (55% female)
+
+-   **cesd_TOT**: Depressive symptomatology (Center for Epidemiological Studies--Depression Scale, Range: 0-36). HIGHER scores = MORE depression symptoms
+
+-   **soc_sup_TOT**: Self-reported social support (Range: 3.83-7). HIGHER scores = MORE social support
+
+-   **sex_anx_TOT**: Self-reported sexual anxiety (Range: 10-23). HIGHER scores = LOWER anxiety
+
+-   **sex_att_TOT**: Self-reported attitudes toward sexuality (Range: 4-37). HIGHER scores = MORE NEGATIVE attitudes
+
+### Question 1 (1pt total)
+
+Read the data in to an object called **sexuality** and summarize it.
+
+```{r}
+
+```
+
+### Question 2 - Creating/overwriting a column (2pts total)
+
+Overwrite the existing Sex column by assigning it the current sex column as a factor. Verify that it worked using the is.factor() command on the indexed column (e.g., is.factor(df\$col_name)).
+
+```{r}
+
+```
+
+### Question 3 - Assumption Checking (Simple Linear Regression; 6pts total)
+
+We will be fitting a model where depression is the **outcome** and sexual anxiety is the **predictor**. Use this to answer all subquestions in Question 3.
+
+a.) Use the ggplot2 code below to create a scatterplot for the relationship between sexual anxiety and depression. (Hint: You may need to do something with ggplot2 and jtools for this code to run.)
+
+```{r}
+ggplot(data=sexuality, aes(x= , y = )) + 
+  geom_point() + jtools::theme_apa()
+```
+
+b.) Using the slides as a reference (if needed), create a histogram AND qqplot for the residuals of this model.
+
+c.) Using the two plots above, comment on the assumptions for simple linear regression discussed in lecture. Should we run the model?
+
+### Question 4 - Model Fitting and Interpretation (Simple Linear Regression; 6pts total)
+
+a.) Write two-tailed null and alternative hypotheses for the effect of sexual anxiety. Use **parameters**, [not words or sample notation]{.underline}.
+
+b.) Fit the model described above to the sexuality data. Interpret the coefficients for the intercept and predictor and report the coefficient for sex_anx_TOT **in APA format** (shown in the slides). Do you reject or fail-to-reject the null?
+
+### Question 5 - Assumption Checking (Multiple Linear Regression; 6pts total)
+
+We're going to switch gears and consider a more plausible model. Please enter Age, Sex, sex_att_TOT, and soc_sup_TOT to the model (in addition to sex anxiety). Age and Sex will be treated as covariates. We actually don't care whether these are significant, we just want to make sure our estimates aren't impacted by them. We will only worry about reporting soc_sup_TOT, sex_anx_TOT, and sex_att_TOT.
+
+a.) Using the slides as a reference (if needed), check and comment on the assumptions for multiple regression. (Hint: There should be two assumptions checked.) Should we run the model? (We will do it anyway.)
+
+### Question 6 - Model Fitting and Interpretation (Multiple Linear Regression; 6pts total)
+
+a.) Write two-tailed null and alternative hypotheses for each parameter that we are interested in. (There should be three since we have three predictors.)
+
+b.) Fit the multiple regression model to the data and produce a summary of the results.
+
+c.) **Interpret only the coefficients** for sex_anx_TOT and soc_sup_TOT. (Don't worry about reporting significance just yet.)
+
+d.) **CREATE CONFIDENCE INTERVALS** (manually, or using a command from the slides) for the model parameters. Are the effects for **the three predictors above** significant from these confidence intervals? Why or why not?
+
+### Question 7 - Overall Conclusions (3pts total)
+
+What can we say about perceptions about sexuality and mental well-being given this study? Are there any concerns we should have about statistical conclusion validity?
+
+## The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal. Thank you! :)
