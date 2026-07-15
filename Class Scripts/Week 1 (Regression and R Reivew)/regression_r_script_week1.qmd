@@ -1,0 +1,245 @@
+---
+title: "Session 1"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# PSYC489K, Session 1: The Basics
+
+This week's session is about catching everyone up to speed on R and regression. This is a long script, but it's for your benefit to look through the solutions and ask questions on what you don't understand.
+
+## R Recap
+
+### Data Types
+
+In this section, we're going to practice working with and creating data of different data types.
+
+#### Numeric/Integer Data
+
+```{r}
+# create a vector of integers with the numbers 0 to 100
+
+# create a vector of the number 1 repeated 1000 times. Check the length of this to verify it is correct. 
+
+
+# calculate the mean of the following vector
+c(1:10, rep(1,10), seq(1, 5, .4), 31:45)
+
+```
+
+What would be the class of the following vector: c(1L, 2L, 3.5L)
+
+#### Character Data
+
+```{r}
+# create a vector with 3 letters and 1 sentence, each as individual elements. What is the length of this vector? 
+
+# Create a vector called cat with the word cat in it and a vector called dog with the word dog in it. Compare cat > dog. What happens and why? 
+```
+
+#### Logical Data
+
+```{r}
+# create a condition that evaluates as TRUE
+
+# create a condtiion that evaluates as FALSE
+
+# create a condition with an OR statement that evaluates to TRUE.
+
+# create a condition with an AND statement that evaluates to FALSE.
+
+```
+
+#### Factor Data
+
+```{r}
+sizes <- c("small","medium", "large")
+# turn the above vector into a factor with ordered levels. 
+
+countries = c("US","Sweden","China","Egypt")
+# turn the above vector into a factor with unordered levels 
+
+```
+
+#### General
+
+```{r}
+# check the class of the below vector
+messy <- c(1L, TRUE, "0", 125)
+
+```
+
+### Data Structures
+
+#### Vectors
+
+```{r}
+# create a vector with the INTEGERS 1 through 100 
+
+# divide this vector by 2 and check the resulting data type
+
+```
+
+#### Matrices
+
+```{r}
+# create a 2x3 matrix with the numbers 1 through 6 in it going from left to right (1, 2, 3 in row 1, 4, 5, and 6 in row 2)
+
+# multiply all elements in the matrix by 2 in a single operation
+
+```
+
+#### Data Frames
+
+```{r}
+# create a data frame with three columnns named numbers, numbers_squared, and numbers_doubled. The first column should be the numbers 1 through 10, the second and third columns should be those numbers squared and doubled, respectively. 
+
+
+# create a fourth column in your data frame called ratio and make it the first column divided by the second column. 
+
+```
+
+### Debugging
+
+Below are lines of code, each with one error. Please fix them so this document renders!
+
+```{r}
+numbers == c(1:100) 
+halved = Numbers/2 
+char = c("a","b",c,"D") 
+Print(char) 
+df = is.data.frame(numbers = 1:3, letters = c("A","B","C")) 
+ncol(df) = length(df) # this should be true
+```
+
+### Loops
+
+```{r}
+# loop through the COLUMNS of the data frame above and computer the standard deviations of each column
+
+# create a for loop that prints the expression "HELLO WORLD!" the number of rows of the data frame above. 
+
+# create an empty results vector the number of rows of the data frame above and fill it with the numbers of the first column doubled. Compare it to the third column in your data frame.
+
+```
+
+### Working with Data
+
+It is critical for us to be able to read in and manipulate data. Please follow the comments in the following code chunk to show your data wrangling skills.
+
+```{r}
+# read in the dataset "airquality" from R using the data() command. 
+
+# describe this dataset with a single line of code. 
+
+# plot two numeric variables of your choice to show you can do it
+
+# read in the craving.csv dataset in preparation for the second half of this file
+
+```
+
+## Regression Recap
+
+The example for today comes from a study on mental health and substance abuse (Witkiewitz & Bowen, 2010). The authors collected data from 168 clients of a public service agency providing treatment for alcohol and substance use disorders. Clients were measured on depression and cravings for alcohol at the beginning and end of a two-month treatment plan. They wanted to determine whether baseline levels of depression significantly predicted alcohol cravings at the end of the program. The variables in the dataset are:
+
+-   BDI0: Scores on the Beck Depression Inventory at the start of therapy. (Scale: 0-3). This is the **predictor**.
+-   CRAVE2: Score on the Penn Alcohol Craving Scale (PACS) two months after therapy. (Scale: 0-6). This is the **outcome**.
+-   CRAVE0: Score on the PACS at the start of therapy. (Scale: 0-6)
+-   TREATHRS: Hours of therapy administered during treatment program.
+
+### Reading in the data
+
+Below is the start to reading in the dataset craving.csv. Complete it.
+
+```{r}
+craving <- read.csv(file= "")
+```
+
+### Loading the required packages
+
+Please load in the ggplot2 and jtools packages using the appropriate syntax.
+
+```{r}
+
+```
+
+### Descriptives
+
+The first thing we want to do is explore our data. This starts with obtaining the descriptives (e.g., mean, range) for reach of the variables in our dataset. Do this using a function in one line of code.
+
+```{r}
+
+```
+
+### Creating a plot
+
+Please create a scatterplot in ggplot2 for the predictor and the outcome appropriately placed on the *x*- and *y*-axes, respectively. ggplot has a very particular syntax, so I will generally provide the bones here and have you plug in your variables. Color the points by the number of treatment hours a client received.
+
+```{r}
+ggplot(data= , aes(x=, y = , color = )) + 
+  geom_point() + 
+  jtools::theme_apa()
+```
+
+### Checking the assumptions
+
+#### Normality of residuals
+
+This is established by creating a Q-Q plot (should be a straight line of any slope) or a histogram of the residuals (should look normal). Let's create both below.
+
+```{r}
+
+```
+
+What can we say about the assumption of normality?
+
+#### Heteroskedasticity and linearity
+
+These are determined from the scatterplot above. What can we say about these assumptions?
+
+**Heteroskedasticity**:
+
+**Linearity**:
+
+### Writing out the hypotheses
+
+What might we expect about the relationship between depression and alcohol cravings? (Hint: Think whether this is a one-tailed or two-tailed hypothesis.) Write the null and alternative hypotheses below (in terms of the parameters):
+
+H0:
+
+H1:
+
+### Fitting the model to the data
+
+Please fit a simple linear regression model to the data and interpret each coefficient in the model.
+
+```{r}
+
+```
+
+B0:
+
+B1:
+
+### Expanding the model
+
+Although the above is a start, it's likely not a well-specified model. We have two other variables in the dataset. What can we do with them? Rerun the model and interpret each coefficient.
+
+```{r}
+
+```
+
+B0:
+
+B1:
+
+B2:
+
+B3:
+
+### Interpreting the results
+
+What can we say given our exploration?
+
+## End of Script
