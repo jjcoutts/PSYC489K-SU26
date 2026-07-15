@@ -1,0 +1,309 @@
+---
+title: "Session 1"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# PSYC489K, Session 1: The Basics
+
+This week's session is about catching everyone up to speed on R and regression. This is a long script, but it's for your benefit to look through the solutions and ask questions on what you don't understand.
+
+## R Recap
+
+### Data Types
+
+In this section, we're going to practice working with and creating data of different data types. If you don't know what data type an object is, you can check it with the class() function.
+
+#### Numeric/Integer Data
+
+Numeric data consist of all real numbers, both whole numbers and decimals. Integer data consist entirely of...integers. In R, you denote integers with the number followed by L. (It's odd, I know.) Mathematically there is no difference here, but integers are more efficient number storage in large datasets.
+
+```{r}
+# create a vector of integers with the numbers 0 to 100
+numbers <- 1:100
+numbers2 <- c(1:100) # another option
+numbers3 <- seq(from = 1, to = 100, by = 1) # another option
+
+# create a vector of the number 1 repeated 1000 times. Check the length of this to verify it is correct.
+lottaones = rep(1,1000)
+length(lottaones)
+
+# calculate the mean of the following vector
+vec = c(1:10, rep(1,10), seq(1, 5, .4), 31:45)
+mean(vec)
+```
+
+#### Character Data
+
+Character data are dominant over other data types in R and consist of any text-based information. Character data must be enclosed in quotation marks (either single or double, so long as you use the same).
+
+```{r}
+# create a vector with 3 letters and 1 sentence, each as individual elements. What is the length of this vector? 
+letters <- c("a","B","I like dogs.","D")
+length(letters)
+
+# Create a vector called cat with the word cat in it and a vector called dog with the word dog in it. Compare cat > dog. What happens and why? 
+cats <- "cat"
+dogs <- "dog" 
+cats > dogs
+# this statement is FALSE because it's based on the first letter of the word (the CONTENTS of the object, not the object name itself)
+```
+
+#### Logical Data
+
+Logical data are the results of logical statements/comparisons. They are especially useful for writing conditional statements (something we don't cover in detail) and subsetting from data sets. They take on the values TRUE or FALSE. Warning: These must be in all caps or R will assume it's an object and they cannot be in quotation marks or R will assume it's character data.
+
+```{r}
+# create a condition that evaluates as true
+"dogs" == "dogs" # true because they're the same character data
+
+# create a condtiion that evaluates as false
+TRUE == FALSE # false because they're different logical values
+
+# create a condition with an OR statement that evaluates to TRUE.
+numbs = 1:100
+min(numbs) < 50 | max(numbs) < 50 # true because at least one of the two - the minimum - is less than 50
+
+# create a condition with an AND statement that evaluates to FALSE.
+min(numbs) < 50 & max(numbs) < 50 # false because only the minimum value is less than 50
+```
+
+#### Factor Data
+
+Factors are sometimes considered a data structure, but in most cases they function like data types. We will use them for analyses when we have a multicategorical antecedent variable or in plotting when we're plotting group interactions.
+
+```{r}
+sizes <- c("small","small","medium", "large")
+# turn the above vector into a factor with ordered levels.
+sizes <- factor(sizes, levels = c("small","medium","large"), ordered=TRUE)
+
+countries = c("US","US","Sweden","Sweden","Sweden","China","Egypt")
+# turn the above vector into a factor with unordered levels 
+countries = factor(countries, levels = unique(countries), ordered = FALSE) # unique(countries) will pull all unique values in the countries vector so we're avoiding repeats. This works well here because there's no order to the levels of the factor.
+```
+
+#### General
+
+Below, you'll see what happens when you mix data types.
+
+```{r}
+# check the class of the below vector
+messy <- c(1L, TRUE, "0", 125)
+class(messy) # it is character because there is one character value
+messy1 <- c(1L, TRUE, 125)
+class(messy1) # it is numeric because there is one numeric value
+messy2 <- c(1L, TRUE)
+class(messy2) # it is integer because there is one integer value
+messy3 <- c(TRUE)
+class(messy3) # it is logical because there is one logical value
+```
+
+### Data Structures
+
+#### Vectors
+
+Vectors are unidimensional objects in R that have to contain a consistent data type. They are great for working with single variables.
+
+```{r}
+# create vector with the INTEGERS 1 through 5 
+int_vec = c(1L:5L)
+class(int_vec)
+
+# divde this vector by 2 and check the resulting data type
+class(int_vec/2) # this is numeric because there are decimal values. (Every odd number divided by 2)
+```
+
+#### Data Frames
+
+Data frames are two-dimensional objects in R and the primary means of storing data sets. Data frames function like Excel spreadsheets. They can contain different data types between columns, but must contain the same data type within a column .
+
+```{r}
+# create a data frame with three columnns named numbers, numbers_squared, and numbers_doubled. The first column should be the numbers 1 through 10, the second and third columns should be those numbers squared and doubled, respectively. 
+df = data.frame(numbers = 1:10, numbers_squared = (1:10)^2, numbers_doubled = (1:10)*2)
+df
+# create a fourth column in your data frame called ratio and make it the first column divided by the second column. 
+df$ratio = df$numbers/df$numbers_squared
+df$ratio2 = df[,1]/df[,2] # a second way to do it
+df$ratio3 = df[,"numbers"]/df[,"numbers_squared"] # a third way to do it
+# all of the above are equally good solutions to indexing the data frame
+
+df # verify these do the same thing
+
+all(df$ratio == df$ratio2) & all(df$ratio2 == df$ratio3)  # verify these are equivalent by using the all() command, which checks whether all values are equal (i.e., all are true)
+# you can also just use 
+df$ratio == df$ratio2
+df$ratio2 == df$ratio3
+```
+
+### Loops
+
+There are multiple types of loops in R, which allow us to iterate through a chunk of code repeatedly. We will exclusively use *for* loops in this class. Although they have many use cases, we will generally only use them for bootstrapping.
+
+```{r}
+# loop through the COLUMNS of the data frame above and calculate the standard deviation of each row
+sd_vec <- rep(NA, ncol(df)) # make this the same length of the number of columns of the data frame
+for(i in 1:ncol(df)){ # this loops through the number of columns of the data frame, so i will be set to 1 through 6, incremented by 1
+  sd_vec[i] <- sd(df[,i]) # this will assign the standard deviation of the ith column of the data frame to the ith element of the standard deviation vector. 
+}
+sd_vec
+
+# create a for loop that prints the expression "HELLO WORLD!" the number of rows of the data frame above. 
+for(i in 1:nrow(df)){
+  print("HELLO WORLD!")
+} # this will loop through the code 10 times and print hello world each time because i = 1, ..., 10
+
+# create an empty results vector the number of rows of the data frame above and fill it with the numbers of the first column doubled. Compare it to the third column in your data frame.
+res = rep(NA, nrow(df))
+for(i in 1:nrow(df)){
+  res[i] = df[i,1]*2
+}
+
+res == df[,3] # it worked! Note, this is less efficient than simply multiplying the values by 2 like we did when creating the data frame
+```
+
+### Working with Data
+
+It is critical for us to be able to read in and manipulate data. Please follow the comments in the following code chunk to show your data wrangling skills.
+
+```{r}
+# read in the dataset "airquality" from R using the data() command. 
+data(airquality)
+
+# describe this dataset with a single line of code. 
+summary(airquality) 
+
+# plot two numeric variables of your choice to show you can do it
+plot(airquality$Solar.R, airquality$Wind)
+
+# read in the craving_ic1.csv dataset in preparation for the second half of this file
+craving <- read.csv("~/PSYC489K-SU26/Datasets/craving_ic1.csv")
+```
+
+### Debugging
+
+Below are lines of code, each with one error. Please fix them so this document renders!
+
+```{r}
+numbers = c(1:100) # issue: two equals signs instead of one
+halved = numbers/2 # issue: numbers was capitalized here and not above
+char = c("a","b","c","D") # issue: missing quotes around c
+print(char) # issue: p in print was capitalized
+df2 = data.frame(numbers = 1:3, letters = c("A","B","C")) # issue: used is.data.frame() instead of data.frame() to create data frame
+ncol(df2) == length(df2) # this should be true # issue: it was missing a second equals sign
+```
+
+## Regression Recap
+
+The example for today comes from a study on mental health and substance abuse (Witkiewitz & Bowen, 2010). The authors collected data from 168 clients of a public service agency providing treatment for alcohol and substance use disorders. Clients were measured on depression and cravings for alcohol at the beginning and end of a two-month treatment plan. They wanted to determine whether baseline levels of depression significantly predicted alcohol cravings at the end of the program. The variables in the dataset are:
+
+-   BDI0: Scores on the Beck Depression Inventory at the start of therapy. (Scale: 0-3). This is the **predictor**.
+-   CRAVE2: Score on the Penn Alcohol Craving Scale (PACS) two months after therapy. (Scale: 0-6). This is the **outcome**.
+-   CRAVE0: Score on the PACS at the start of therapy. (Scale: 0-6)
+-   TREATHRS: Hours of therapy administered during treatment program.
+
+### Reading in the data
+
+Below is the start to reading in the dataset craving_ic1.csv. Complete it.
+
+```{r}
+craving <- read.csv("~/PSYC489K-SU26/Datasets/craving_ic1.csv")
+```
+
+### Loading the required packages
+
+Please load in the ggplot2 and jtools packages using the appropriate syntax.
+
+```{r}
+library(ggplot2)
+library(jtools)
+```
+
+### Descriptives
+
+The first thing we want to do is explore our data. This starts with obtaining the descriptives (e.g., mean, range) for reach of the variables in our dataset. Do this using a function in one line of code.
+
+```{r}
+summary(craving)
+```
+
+### Creating a plot
+
+Please create a scatterplot in ggplot2 for the predictor and the outcome appropriately placed on the *x*- and *y*-axes, respectively. ggplot has a very particular syntax, so I will generally provide the bones here and have you plug in your variables. Color the points by the number of treatment hours a client received.
+
+```{r}
+ggplot(data= craving, aes(x=bdi0, y = crave2 , color = treathrs)) + 
+  geom_point() + 
+  jtools::theme_apa()
+```
+
+### Checking the assumptions
+
+#### Normality of residuals
+
+This is established by creating a Q-Q plot (should be a straight line of any slope) or a histogram of the residuals (should look normal). Let's create both below.
+
+```{r}
+bdi_model = lm(crave2 ~ bdi0, data =craving)
+
+qqnorm(resid(bdi_model))
+hist(resid(bdi_model))
+```
+
+What can we say about the assumption of normality?
+
+The assumption seems reasonable. The histogram appears to be normal in shape and the qq-plot showed a relatively straight line. There don't seem to be gross departures from normality here.
+
+#### Heteroskedasticity and linearity
+
+These are determined from the scatterplot above. What can we say about these assumptions?
+
+**Heteroskedasticity**: Does not seem to be present based on the plot. There are no obvious funnel shapes or change in the variance of X across Y.
+
+**Linearity**: Linearity seems to be a reasonable assumption given the plot. There are no curves or flattening off points.
+
+### Writing out the hypotheses
+
+What might we expect about the relationship between depression and alcohol cravings? (Hint: Think whether this is a one-tailed or two-tailed hypothesis.) Write the null and alternative hypotheses below (in terms of the parameters):
+
+H0: B1 \<= 0 (i.e., the population effect of depression on alcohol cravings is negative or zero).
+
+H1: B1 \> 0 (i.e., depression will have a positive effect on alcohol cravings)
+
+### Fitting the model to the data
+
+Please fit a simple linear regression model to the data and interpret each coefficient in the model.
+
+```{r}
+summary(bdi_model) # using the model object from earlier
+```
+
+B0: The intercept was 0.961 (*t* = 3.423, *p* \< .001). People with a depression score of zero are expected to have an alcohol craving of 0.961.
+
+B1: The effect of depression at baseline on subsequent alcohol cravings was significant, *b1* = 0.965, *t* = 4.26, *p* \< .001. People's cravings were expected to increase by 0.965 for each one-unit increase in depressive symptoms.
+
+### Expanding the model
+
+Although the above is a start, it's likely not a well-specified model. We have two other variables in the dataset. What can we do with them? Rerun the model and interpret each coefficient.
+
+```{r}
+# we're going to run a multiple regression controlling for cravings at baseline and treatment hours and see if anything changes. 
+mult_bdi_model <- lm(crave2 ~ crave0 + bdi0 + treathrs, data = craving)
+summary(mult_bdi_model)
+```
+
+B0: Those with no cravings or depressive symptoms at baseline with 0 treatment hours were expected to have an alcohol craving of 1.355 at the end of the treatment plan, *b0* = 1.355, *t* = 3.02, *p* \< .001.
+
+B1: The effect of baseline cravings on subsequent cravings was significant after controlling for baseline depression and treatment hours, *b1* = 0.225, *t* = 2.921, *p* = .003. People's cravings were expected to increase by 0.225 for each additional unit of baseline cravings.
+
+B2: The effect of baseline depression on subsequent cravings was significant after controlling for baseline cravings and treatment hours, *b2* = 0.781, *t* = 3.465, *p* = .001. People's cravings were expected to increase by .781 for each additional unit of depressive symptomatology.
+
+B3: The effect of treatment hours on subsequent cravings was significant after controlling for baseline depression and baseline cravings, *b3* = -0.027, *t* = -2.598, *p* = .010. People's craving were expected to decrease by 0.027 units for each additional hour of therapy they received.
+
+### Interpreting the results
+
+What can we say given our exploration?
+
+It seems like depressive symptoms are a huge contributing factor to alcohol abuse. They do not act in isolation, however, as a predisposition to cravings is also impactful and therapy does help reduce cravings over time.
+
+## End of Script
