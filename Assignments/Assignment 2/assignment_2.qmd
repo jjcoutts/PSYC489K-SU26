@@ -1,0 +1,135 @@
+---
+title: "Assignment 2"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Assignment 2: Mediation Analysis
+
+## Description
+
+This assignment is going to test your skills in mediation analysis. (Both simple and more complicated models.) The slides for both units and textbook are **critical** to your success here.
+
+**Disclaimer:** Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code. Email me a question or reach out to a classmate if anything is unclear or you need help.
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed. (See Assignment 1 for formatting guidelines/recommendations.)
+
+## The Dataset
+
+The data for this assignment come from a study on product weight and perceptions of quality. Specifically, this study investigated whether artificially weighting chocolate wrappers caused people to perceive the flavor as more intense, and thus, make them more likely to purchase it. This information is valuable to both businesses and consumers, as the former want to sell products and the latter want to avoid tricks that business can play to increase sales without increasing quality. The data we use are the original data from the study. The variables we will be looking at are:
+
+-   **flav_intense**: Ratings of intensity/potency of flavor, high scores = more intense (Range: 1-7)
+
+-   **flav_eval**: Ratings of flavor, higher scores = better evaluation (Range: 1-7)
+
+-   **packweight**: Experimental manipulation, 1 = light packaging, 2 = heavy packaging
+
+-   **purchase**: Willingness to pay where higher scores = greater willingness (Range: 0-10)
+
+-   **sex**: A participant's biological sex (56.12% female)
+
+-   **age**: A participant's age at the time of the study (Range: 17-36)
+
+## Hypotheses
+
+The authors hypothesized that package weight would predict likelihood to purchase the chocolate, but only first because it would increase intensity and enjoyment of flavor. They wanted to control for sex and age in all model equations. In other words, the variables fit the roles identified below:
+
+**Predictor (*X*):** Package weight (packweight)
+
+**Mediator 1 (*M1*):** Flavor intensity (flav_intense)
+
+**Mediator 2 (*M2*):** Flavor evaluation (flav_eval)
+
+**Outcome (*Y*):** Purchase likelihood (purchase)
+
+**Covariates:** Age and sex
+
+We will be using **bootstrapping** for all analyses. Remember that if you use PROCESS, you only need to add contrast = 1 (raw difference) or contrast = 2 (difference in absolute values) to compare indirect effects.
+
+## Questions (30pts total)
+
+### Question 1 (1pt total)
+
+**Data Exploration:** Load the ggplot2 and jtools packages. Read the data in to an object called **chocolate** and summarize it.
+
+```{r}
+# load packages
+
+# read in data 
+
+# summarize data
+```
+
+### Question 2 (8pts total)
+
+**Two simple mediation models:** We're going to start by fitting two simple mediation models to the data: one with flavor intensity as the mediator and one with flavor evaluation as a mediator. **Remember to control for sex and age and compare the indirect effects if it is possible.** Please follow this framework:
+
+#### Model Equations (can be for both models, don't need error term)
+
+Y = ...
+
+#### Fit the models (can be both in same chunk)
+
+```{r}
+
+```
+
+#### Model Results (Write-up can be for both models)
+
+What is/is not significant, interpret important effects, can we say they're different? Strengths/weaknesses?
+
+### Question 3 (8pts total)
+
+**Parallel Mediation:** We're going to fit a parallel multiple mediation model to the data where flavor intensity and flavor evaluation are mediators. Remember to control for sex and age and compare the indirect effects if it is possible. Please follow this framework:
+
+#### Model Equations (don't need error term)
+
+Y = ...
+
+#### Fit the models
+
+```{r}
+
+```
+
+#### Model Results (Write-up)
+
+What is/is not significant, interpret important effects, can we say they're different?
+
+### Question 4 (8pts total)
+
+**Serial Mediation:** We're going to fit a serial multiple mediator model, where the order is X -\> M1 -\> M2 -\> Y (i.e., packweight -\> flav_intense -\> flav_eval -\> purchase). Remember to control for sex and age and compare the indirect effects if it is possible. Please follow this framework:
+
+#### Model Equations (don't need error term)
+
+Y = ...
+
+#### Fit the models
+
+```{r}
+
+```
+
+#### Model Results (Write-up)
+
+What is/is not significant, interpret important effects, can we say they're different?
+
+### Question 5 (5pts total)
+
+Model selection: NOT BASED ON THE SIGNIFICANCE OF THE RESULTS, but rather, on theoretical rationale/argument, which model do you think best captures reality and why? What would you recommendation be to a company that came to you asking if they should create heavier wrappers for their chocolate bars?
+
+### Bonus: Data Visualization/Conceptual Diagram of Chosen Model (1pts)
+
+Using the ggplot2 code below, visualize whatever paths are part of the indirect effect(s) from your chosen model. Copy/paste these plots onto a conceptual diagram for your hypotheses and fill in the paths with estimates. This diagram can be turned in as a .pptx, .jpg, or another file type on the bonus submission question.
+
+```{r}
+# general ggplot2 structure
+ggplot(data=chocolate, aes(x= , y = )) + 
+  geom_point() + 
+  jtools::theme_apa()
+```
+
+## The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal. Thank you! :)
