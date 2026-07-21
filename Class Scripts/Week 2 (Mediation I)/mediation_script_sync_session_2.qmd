@@ -1,0 +1,124 @@
+---
+title: "PSYC489K, Session 2: Mediation Analysis"
+format: html
+editor: visual
+---
+
+# Mediation
+
+Mediation analysis allows us to discover *how X* causes *Y*, or in other words, the *mechanism* by which *X* exerts its influence on *Y*. Mathematically, mediation is quite simple and follows nicely from the regression review from last week.
+
+## Load required packages
+
+You should load the jtools and ggplot2 packages.
+
+```{r}
+# be sure to also load PROCESS so it can be used later in this script
+
+# to load in PROCESS....
+source("~/PSYC489K-SU26/process_v5") # make sure this goes to the correct file path
+```
+
+## Read in and summarize the data
+
+Our dataset today comes from a study on war veterans and their development of posttraumatic stress disorder (PTSD) returning home from deployment (Pitts et al., 2018). Combat is often a traumatic experience for war vets, who can struggle with PTSD in the wake of re-entry into society. It is critical for us to identify ways to improve the lives of those of have given a part of theirs to protect us. The variables in this dataset are:
+
+-   ptsd: Self-reported PTSD symptomatology, higher scores = more PTSD (Range: -12.21, 70.52)
+
+-   dep: Self-reported depression levels, higher scores = more depression (Range: -9.642, 23.315)
+
+-   combat: Higher scores indicate more exposure to traumatic combat experiences (Range: -5.502, 26.033)
+
+-   pthreat: Perceived threat to life and concerns about safety, higher scores = more threat (Range: 11.92, 72.98)
+
+-   viewofd: Perceived benefits of deployment, higher score = more benefits (Range: 6.738, 38.779)
+
+-   sociald: Social desirability, higher score = greater inclination to appear socially desirable (Range: 0.0471, 17.495)
+
+Read in and summarize the data.
+
+```{r}
+warvet <- read.csv()
+# now summarize the data
+```
+
+## Model Prep
+
+Say we interested in determining whether traumatic experiences during combat (COMBAT) increased PTSD (PTSD), at least in part because they increased perceived threats to life (PTHREAT). Please write out the conceptual diagram, statistical diagram, and model equations for this.
+
+## Different Inferential Tests
+
+For consistency, set the seed to 489 at the the bootstrap and Monte Carlo sections to ensure we get the same results.
+
+### The causal steps
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+Test these by **fitting regression models to the data by yourself** (no PROCESS).
+
+```{r}
+
+```
+
+### The joint test
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+Test these by using PROCESS.
+
+```{r}
+
+
+```
+
+### Sobel test
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+
+```
+
+### The bootstrap
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+
+```
+
+### Monte Carlo
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+
+```
+
+## Data Visualization
+
+Let's visualize the *a* and *b* paths (note: the b path will not be the true visualization, just do a simple scatterplot between x and y). Generic code for a scatterplot in ggplot2 is below.
+
+```{r}
+# for the a path...
+ggplot(data= , aes(x = , y = )) + 
+  geom_point() + 
+  jtools::theme_apa()
+
+# for the b path... (sort of; it's a simple regression plot from a multiple regression)
+ggplot(data= , aes(x = , y = )) + 
+  geom_point() + 
+  jtools::theme_apa()
+```
+
+## Statistical Diagram
+
+Complete our diagram from earlier with the information from the model. Add the scatterplots above to make this ready for production.
+
+End of script
