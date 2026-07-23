@@ -1,0 +1,237 @@
+---
+title: "PSYC489K, Session 2: Mediation Analysis"
+format: docx
+editor: visual
+---
+
+# Mediation
+
+Mediation analysis allows us to discover *how X* causes *Y*, or in other words, the *mechanism* by which *X* exerts its influence on *Y*. Mathematically, mediation is quite simple and follows nicely from the regression review from last week.
+
+## Load required packages
+
+You should load the jtools and ggplot2 packages.
+
+```{r}
+# load in required packages
+library(jtools) # for apa style plots
+library(ggplot2) # for fancy plots
+# be sure to also load PROCESS so it can be used later in this script
+#source("~/PSYC489K-SU26/process_v5.R") # make sure this goes to the correct file path
+source("G:/My Drive/FlashDrive/Teaching Materials/PSYC489K (MedMod)/process_v5.R")
+```
+
+## Read in and summarize the data
+
+Our dataset today comes from a study on war veterans and their development of posttraumatic stress disorder (PTSD) returning home from deployment (Pitts et al., 2018). Combat is often a traumatic experience for war vets, who can struggle with PTSD in the wake of re-entry into society. It is critical for us to identify ways to improve the lives of those of have given a part of theirs to protect us. The variables in this dataset are:
+
+-   ptsd: Self-reported PTSD symptomatology, higher scores = more PTSD (Range: -12.21, 70.52)
+
+-   dep: Self-reported depression levels, higher scores = more depression (Range: -9.642, 23.315)
+
+-   combat: Higher scores indicate more exposure to traumatic combat experiences (Range: -5.502, 26.033)
+
+-   pthreat: Perceived threat to life and concerns about safety, higher scores = more threat (Range: 11.92, 72.98)
+
+-   viewofd: Perceived benefits of deployment, higher score = more benefits (Range: 6.738, 38.779)
+
+-   sociald: Social desirability, higher score = greater inclination to appear socially desirable (Range: 0.0471, 17.495)
+
+Read in and summarize the data.
+
+```{r}
+# store data in an object called warvet"G:/My Drive/FlashDrive/Teaching Materials/PSYC489K (MedMod)/
+warvet <- read.csv(file = "G:/My Drive/FlashDrive/Teaching Materials/PSYC489K (MedMod)/Datasets/ptsd_vet_ic2.csv")
+
+#warvet <- read.csv(file = "~/PSYC489K-SU25/Datasets/ptsd_vet.csv")
+# now summarize the data
+summary(warvet)
+```
+
+## Model Prep
+
+Say we interested in determining whether traumatic experiences during combat (COMBAT) increased PTSD (PTSD), at least in part because they increased perceived threats to life (PTHREAT). Please write out the conceptual diagram, statistical diagram, and model equations for this.
+
+## Different Inferential Tests
+
+For consistency, set the seed to 489 at the the bootstrap and Monte Carlo sections to ensure we get the same results.
+
+### The causal steps
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+**Step 1 - Total effect significant**
+
+$H_0: c=0$ (where *c* represents the population total effect of COMBAT on PTSD)
+
+$H_1: c \neq 0$
+
+**Step 2 - a path significant**
+
+$H_0:a=0$
+
+$H_1: a \neq 0$
+
+**Step 3 - b path significant**
+
+$H_0:b=0$
+
+$H_1: b \neq 0$
+
+**Step 4 - c' not significant**
+
+Recall: According to Baron and Kenny, partial mediation if direct effect is still significant. Complete mediation if non significant.
+
+Test these by **fitting regression models to the data by yourself** (no PROCESS).
+
+```{r}
+cpath <- lm(ptsd ~ combat, data = warvet); summary(cpath) # does x cause y
+# c path significant, carry on
+apath <- lm(pthreat ~ combat, data = warvet); summary(apath) # does x cause m
+# a path significant, carry on
+bcppath <- lm(ptsd ~ combat + pthreat, data = warvet); summary(bcppath) # does m cause y? is there any remaining effect of X after controlling for m?
+# b path significant, c' too, so partial mediation
+```
+
+The nulls for hypotheses 1-3 were rejected, meaning that we can deem perceived threat as a mediator of the relationship between traumatic combat experiences and ptsd symptoms. Since the direct effect was still significant, we can only claim partial mediation (according to the causal steps).
+
+### The joint test
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+**a and b jointly significant**
+
+$H_0:a \; and/or \; b=0$
+
+$H_1: a \neq 0 \; and \; b \neq 0$
+
+Test these by using PROCESS.
+
+```{r}
+process(data = warvet, x = "combat", m="pthreat", y = "ptsd", model = 4, boot=0) # boot = 0 will suppress the bootstrap output, which we don't want since we're using the joint test
+# additionally, model 4 is for simple (and parallel) mediation models
+```
+
+Since *a* and *b* were both significant, we can deem perceived threat as a mediator of the relationship between traumatic combat experiences and ptsd.
+
+### Sobel test
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+$H_0:ab=0$
+
+$H_1: ab \neq 0$
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+# manually...we need to pull the coefficients from the model objects and standard errors from the variance covariance matrix
+apath <- lm(pthreat ~ combat, data = warvet)
+a <- coef(apath)[2]
+se_a <- sqrt(diag(vcov(apath)))[2]
+bcppath <- lm(ptsd ~ combat + pthreat, data = warvet)
+b <- coef(bcppath)[3]
+se_b <- sqrt(diag(vcov(bcppath)))[3]
+zstat <- a*b/sqrt(a^2*se_b^2+b^2*se_a^2+se_a^2*se_b^2)
+unname(zstat)
+
+# in PROCESS
+process(data = warvet, x = "combat", m="pthreat", y = "ptsd", model = 4, boot=0, normal = 1) # normal = 1 will generate the Sobel test when used with a mediation model. Boot is still 0 because we don't want to generate bootstrap confidence intervals. 
+```
+
+### The bootstrap
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+$H_0:ab=0$
+
+$H_1: ab \neq 0$
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+# manually 
+# set parameters of the bootstrap 
+B = 5000 # number of resamples
+n = nrow(warvet) # sample size
+bs_res <- rep(NA, B) # empty vector to store results
+set.seed(489) # seed to reproduce results 
+
+# begin bootstrapping
+for(i in 1:B){
+  b_dat <- warvet[sample(1:n, n, replace = TRUE),] # creates resampled dataset
+  boota <- coef(lm(pthreat ~ combat, data = b_dat))[2]
+  bootb <- coef(lm(ptsd ~ combat + pthreat, data = b_dat))[3]
+  bs_res[i] <- boota*bootb
+}
+# create bootstrap confidence intervals
+bs_ci <- quantile(bs_res, c(.025, .975))
+# show bootstrap CI
+print(bs_ci)
+
+# In PROCESS...
+process(data = warvet, y = "ptsd", m = "pthreat", x = "combat", model = 4, seed = 489,progress=0) # seed will make the results reproducible, which is important because bootstrapping is otherwise a completely random process
+# additionally, bootstrapping in PROCESS comes with a progress bar, which is cool but makes certain outputs wonky. I will add progress = 0 to all PROCESS commands in this class.
+```
+
+We reject the null that the indirect is zero and deem perceived threat a mediator of the relationship between combat experiences and ptsd, 95% percentile bootstrap CI = \[0.134, 0.409\]. We rejected the null because the 95% confidence interval did not contain 0 and 95% of infinitely many confidence intervals constructed the same way will contain the true population mean.
+
+### Monte Carlo
+
+What are the hypotheses we are testing (in terms of parameter\[s\])?
+
+$H_0:ab=0$
+
+$H_1: ab \neq 0$
+
+Do this manually (i.e., by yourself) or using PROCESS.
+
+```{r}
+# set parameters 
+MC = 5000 # number of resamples
+set.seed(489) # make results reproducible
+
+# manually 
+mca <- rnorm(MC,a, se_a) # generate 5000 different a paths from a distribution based on our observed one
+mcb <- rnorm(MC,b, se_b) # generate 5000 different b paths from a distribution based on our observed one
+
+# create MC CI
+mc_ci <- quantile(mca*mcb, c(.025, .975))
+# show MC CI
+print(mc_ci)
+
+# In PROCESS... 
+process(data = warvet, y = "ptsd", m = "pthreat", x = "combat", model = 4, mc = 1, seed = 489, total = 1)
+# we add mc = 1 to generate monte carlo CIs
+# additionally, total = 1 will print the results for the total effect model. 
+```
+
+We reject the null that the indirect is zero and deem perceived threat a mediator of the relationship between combat experiences and PTSD, 95% percentile Monte Carlo CI = \[0.146, 0.387\]. We rejected the null because the 95% confidence interval did not contain 0 and 95% of infinitely many confidence intervals constructed the same way will contain the true population mean.
+
+## Data Visualization
+
+Let's visualize the *a* and *b* paths (note: the b path will not be the true visualization, just do a simple scatterplot between x and y). Generic code for a scatterplot in ggplot2 is below.
+
+```{r}
+# for the a path...
+ggplot(data= warvet, aes(x = combat, y = pthreat)) + # sets up graph structure
+  geom_point() + # creates a scatterplot
+  jtools::theme_apa() + # makes apa format 
+  labs(x = "Traumatic Combat Experiences", y = "Perceived Threats to Life") + # changes the axis labels
+  geom_smooth(method = "lm", color = "navy", se = FALSE) # adds a regression line of best fit
+
+# for the b path... (sort of; it's a simple regression plot from a multiple regression)
+ggplot(data= warvet, aes(x = pthreat, y = ptsd)) + # sets up graph structure
+  geom_point() + # creates a scatterplot 
+  jtools::theme_apa() + # makes apa format 
+  labs(x = "Perceived Threats to Life", y = "PTSD Symptoms") + # changes the axis labels
+  geom_smooth(method = "lm", color = "firebrick4", se = FALSE) # adds a regression line of best fit
+```
+
+## Statistical Diagram
+
+Complete our diagram from earlier with the information from the model. Add the scatterplots above to make this ready for production.
+
+I uploaded a complete version to ELMS.
+
+End of script
