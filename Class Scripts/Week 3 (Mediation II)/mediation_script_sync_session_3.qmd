@@ -1,0 +1,135 @@
+---
+title: "PSYC489K, Session 3: Multiple Mediation Analysis"
+format: docx
+editor: visual
+---
+
+# Multiple Mediation
+
+Multiple mediation analysis allows us to discover more complex mechanisms and/or multiple mechanisms by which *X* affects *Y*. Mathematically, multiple mediation generalizes well from simple mediation. (It's just more equations and/or more variables in the equations.) There are two types of multiple mediator models: parallel (where the mediators are specified as correlated with one another) and serial (where the mediators are specified to causally influence each other). We also learned how to control for covariates and will be doing so today.
+
+**Parallel Mediation Equations**
+
+It is actually fairly simple to test for parallel mediation. You need an equation for each mediator and to put all mediators in the equation for *Y*. For example, with two mediators, the equations are:
+
+$$M_1=d_{m_{1}} + a_1X$$
+
+$$M_2=d_{m_{2}} + a_2X$$
+
+$$Y=d_y + c'X+b_1M_1+b_2M_2$$
+
+The specific indirect effect of *X* on *Y* through $M_1$ (controlling for $M_2$) is $a_1b_1$. The specific indirect effect of *X* on *Y* through $M_2$ (controlling for $M_1$) is $a_2b_2$. The **total indirect effect of *X* on *Y*** is the sum of these, $a_1b_1$ + $a_2b_2$. Adding this to $c'$ will give you the total effect, which is *Y* regressed on *X* alone.
+
+Fitting such a model in PROCESS is easy. We can do it with the following code (assuming the variable names are *X*, *M1*, *M2*, and *Y*, and the data frame they are stored in is called df):\
+process(data = df, x = "X", m = c("M1","M2"), y = "Y", model = 4). Remember: model = 4 applies to simple mediation models and parallel mediation models. We can set the seed by adding the **seed = NUMBER** command, which will help us reproduce the results if we run the code again.
+
+**Serial Mediation Equations**
+
+Serial mediation is a bit more complicated. To fit this model, you have an equation for each mediator (and all mediators entered in the equation for the outcome), but you also have all prior mediators entered in the equation(s) for mediators later in the causal chain. For example, with two mediators, the equations are:
+
+$$M_1=d_{m_{1}} + a_1X$$
+
+$$M_2=d_{m_{2}} + a_2X+i_{m_{1}}$$
+
+$$Y=d_y + c'X+b_1M_1+b_2M_2$$
+
+The specific indirect effect of *X* on *Y* through $M_1$ (controlling for $M_2$) is $a_1b_1$. The specific indirect effect of *X* on *Y* through $M_2$ (controlling for $M_1$) is $a_2b_2$. The specific indirect effect through $M_1$ and $M_2$ is $a_1ib_2$. The **total indirect effect of *X* on *Y*** is the sum of all these, $a_1b_1$ + $a_2b_2$ + $a_1ib_2$. Adding this to $c'$ will give you the total effect, which is *Y* regressed on *X* alone.
+
+Fitting such a model in PROCESS is easy. We can do it with the following code (assuming the variable names are *X*, *M1*, *M2*, and *Y*, and the data frame they are stored in is called df):\
+process(data = df, x = "X", m = c("M1","M2"), y = "Y", model = 6). model = 6 tells PROCESS we want a serial mediation model. It will assume the order we enter the variables in the m = c() command is the order of the chain (i.e., *X*-\>*M1*-\>*M2*-\>*Y*). We can set the seed by adding the **seed = NUMBER** command, which will help us reproduce the results if we run the code again.
+
+**Comparing Indirect Effects**
+
+One of the biggest strengths of multiple mediation models is the ability to compare specific indirect effects. This allows us to determine whether indirect effects are "stronger" than another. This is easy to do manually in our bootstrapping algorithm and even easier in PROCESS.
+
+If the indirect effects are the same sign, simply take the raw difference of the indirect effects. If the indirect effects are of different signs, you should take the difference of absolute values or compute the sum of the indirect effects.
+
+In PROCESS, simply add the **contrast = 1** argument to compare indirect effects using the **raw difference** and **contrast = 2** to compare indirect effects using the **difference of absolute values**.
+
+## Load required packages
+
+You should load the jtools and ggplot2 packages. Be sure to also load PROCESS. (The code below will let my computer know where the process.R file is stored so it can manually retrieve and run the file while rendering. It will generate an error otherwise.)
+
+```{r}
+# load packages
+
+
+```
+
+## Read in and summarize the data
+
+Our dataset today comes from a study on war veterans and their development of posttraumatic stress disorder (PTSD) returning home from deployment (Pitts et al., 2018). (This is the same data from last week.) The variables in this dataset are:
+
+-   **ptsd:** Self-reported PTSD symptomatology, higher scores = more PTSD (Range: -12.21, 70.52)
+
+-   **dep:** Self-reported depression levels, higher scores = more depression (Range: -9.642, 23.315)
+
+-   **combat:** Higher scores indicate more exposure to traumatic combat experiences (Range: -5.502, 26.033)
+
+-   **pthreat:** Perceived threat to life and concerns about safety, higher scores = more threat (Range: 11.92, 72.98)
+
+-   **viewofd:** Perceived benefits of deployment, higher score = more benefits (Range: 6.738, 38.779)
+
+-   **sociald:** Social desirability, higher score = greater inclination to appear socially desirable (Range: 0.0471, 17.495)
+
+Read in and summarize the data.
+
+```{r}
+warvet <- read.csv()
+# now summarize the data
+
+```
+
+## Model Prep
+
+Say we interested in determining whether traumatic experiences during combat (COMBAT) increased PTSD (PTSD), at least in part because they increased perceived threats to life (PTHREAT) and also increased perceived benefits of deployment (VIEWOFD). We also want to control for socially desirable response tendencies (SOCIALD).
+
+## Parallel Mediation Model
+
+First, we will fit the model with the mediators in parallel. This means we will control for the correlation between perceived benefits of deployment and perceived threats of life (while also controlling for social desirability). By doing this, we are also assuming that neither of these variables causes the other. First, fit this model (either manually or in PROCESS). Also produce the appropriate contrasts between the specific indirect effects.
+
+```{r}
+# fit the model manually or in PROCESS
+
+```
+
+**Report the results of this model. What can we say about the indirect effects individually?**
+
+**Which contrast should we conduct? What are the results of this test?**
+
+## Serial Mediation Model
+
+Now, we will fit the serial mediation model. This means we are assuming one of the mediators is causing the other after being caused by the predictor (while controlling for social desirability). First, fit this model (either manually or in PROCESS). Consider which mediator should be in which position and be prepared to justify your response. Also produce the contrasts between the specific indirect effects.
+
+```{r}
+# fit the model manually or in PROCESS
+
+```
+
+**Which mediator did you put first and second? Why?**
+
+**Report the results of this model. What can we say about the indirect effects individually?**
+
+**Which contrast(s) should we conduct? What are the results of this test?**
+
+## Model Selection
+
+Which model is better? Why? You may consider statistical results in this evaluation, but recall that theory is more important.
+
+## Data Visualization
+
+Visualize each path of your chosen model.
+
+```{r}
+# start with a1 and move from there... (copy and paste framework as needed)
+ggplot(data= ) + 
+  geom_point(aes(x= , y = )) + 
+  jtools::theme_apa()
+
+```
+
+## Statistical Diagram
+
+Create a complete statistical diagram with all pertinent information (paths, *p*-values, scatterplots). Make this ready for production.
+
+End of script
