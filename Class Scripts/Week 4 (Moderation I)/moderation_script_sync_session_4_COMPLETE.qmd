@@ -1,0 +1,234 @@
+---
+title: "Synchronous Session 4"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Moderation Analysis
+
+Moderation analysis allows us to uncover the "when" and "for whom" qualifying a causal effect. In other words, it can tell us the boundary conditions of an effect---*when* or *for what values of* $W$ (the moderator) the effect of $X$ on $Y$ positive versus negative, present versus not, or stronger versus weaker. Like mediation, most, if not all effects, are moderated. It is common for a relationship to vary as a function of gender, race, presence of a psychological disorder, or level of some continuous factor (e.g., age or mg of a drug). As we'll see, the testing of moderation is actually quite simple. (It's just multiple regression.) It is the interpretation of moderated (aka "interaction") effects that can become challenging.
+
+## **The Simple Moderation Model**
+
+As mentioned previously, a simple moderation model is just a multiple regression equation with one new parameter (to us):
+
+$$
+Y=d_Y+b_1X+b_2+b_3XW
+$$
+
+where $d_Y$ is an intercept term, $b_1$ represents the change in $Y$ with a one-unit increase in $X$ when $W$ is 0 (note, not controlling for $W$, which makes this a *conditional effect or simple effect*, not a *partial effect* like in typical multiple regression), $b_2$ represents the change in $Y$ with a one-unit increase in $W$ when $X$ is 0, and $b_3$ represents the change in the effect of $X$ on $Y$ as $W$ increases by one-unit (and vice versa). $b_3$ quantifies the interaction effect, which is a symmetrical claim mathematically. If $b_3$ is significant, then any two conditional effects at any two values of $W$ are significantly different from each other.
+
+Where moderation differs from interaction is that moderation imposes agency on the model variables. $X$ is called the *focal predictor* and $W$ the *moderator* that is changing (or moderating) its effect. This additional claim cannot be supported mathematically, so moderation is a philosophical argument we must make on top of a mathematical test of the interaction effect.
+
+**Note:** We represent moderators with $W$ to avoid confusion with mediators/mediation. The only new thing here is the product of $X$ and $W$, which carries the interaction effect. We can test the weight for this effect, $b_3$, with typical regression procedures. We don't need to use bootstrapping, Monte Carlo, or anything else fancy.
+
+## Data Example 
+
+Our data today come from a study on Palestinian children experiencing traumatic events during the Al-Aqsa Intifada on the Gaza strip in 2006 (Peltonen et al., 2010). These data have been generated to produce identical results to the original study. A total of 113 children were measured on a variety of constructs including:
+
+-   **age:** The age of the child in years. (Range: 10-14)
+
+-   **depress:** Self-reported depression levels, higher scores = more depression. (Range: 1-28)
+
+-   **trauma:** Number of traumatic events experienced (e.g., house exploding, witnessing a death), higher scores = more trauma. (Range: 0-18)
+
+-   **lonely:** Self-reported loneliness. Higher scores = more loneliness. (Range: 1-5)
+
+-   **ptsd:** Self-reported PTSD symptoms. Higher scores = more symptoms. (Range: 0-54)
+
+### Load Required Packages
+
+You should load the **jtools** and **ggplot2** packages. Be sure to also load PROCESS. (The code below will let my computer know where the process_v5.R file is stored so it can manually retrieve and run the file while rendering. It will generate an error otherwise.)
+
+```{r}
+# load required packages
+library(jtools)
+library(ggplot2)
+# remember to load PROCESS and route it to the correct location
+source("~/PSYC489K-SU26/process_v5.R")
+```
+
+### Read in the Data
+
+```{r}
+# read data into data frame
+child_trauma <- read.csv("~/PSYC489K-SU25/Datasets/trauma.csv")
+
+# now summarize the data
+summary(child_trauma)
+```
+
+### Model Prep
+
+Our hypothesis is that loneliness moderates the relationship between PTSD and depression. Specifically, $X$ = ptsd, $W$ = lonely, and $Y$ = depression. More precisely, we anticipate that the more lonely one is, the more severely that PTSD will impact their depression.
+
+## Fitting the Model
+
+First, we will fit the model to the data and test whether the interaction is significant.
+
+```{r}
+# this approach automatically enters the interaction term and the lower-order effects
+mod1 <- lm(depress~ptsd*lonely, data = child_trauma); summary(mod1)
+# this approach manually enters each effect. In R, interaction effects are represented by a colon between the variables in the effect
+mod2 <- lm(depress~ptsd + lonely + ptsd:lonely, data =child_trauma); summary(mod2)
+```
+
+**Is the interaction effect significant? What can we say about this relationship?**
+
+$b_1$: Depression is expected to decrease by .26 units when loneliness is 0 and ptsd increases by one unit. This effect is significant, $b_1 = -0.26, t = -2.15, p = .03$.
+
+$b_2$: Depression is expected to decrease by .66 units when ptsd is 0 and loneliness increases by one unit. This effect is not significant, $b_2 = -0.66, t = -0.45, p = .65$.
+
+$b_3$: The effect of ptsd on depression is expected to increase by 0.12 units for each one-unit increase in loneliness (and vice versa). This effect is significant, $b_3 = 0.12, t = 2.43, p = .02$.
+
+The interaction effect is significant. Thus, we can conclude that loneliness moderates the relationship between ptsd and depression, such that the more lonely one is, the more ptsd symptoms lead to depressive symptoms (and vice versa). Because the interaction effect is significant, any two simple effects of PTSD on depression at different levels of loneliness are significantly different from each other.
+
+## Probing Interactions
+
+Knowing that the moderation is significant does not do much for us in understanding what form it takes. We must do something called *probing* the interaction to learn more. There are two approaches to this that are best suited for different levels of measurement in the moderator.
+
+### The Simple Slopes Procedure
+
+We will first probe the model with the *simple slopes procedure*. (Also called *spotlight analysis* \[Spiller et al., 2013\] or the *analysis of simple slopes*.) This procedure allows us to test the conditional effect of the predictor at specific values of the moderator. (e.g., If the moderator is gender, the interaction effect tells us whether men and women are different in their effect of $X$ on $Y$, and the simple slopes procedure will tell us whether the effect for men is significant and whether the effect for women is significant.
+
+When the moderator is categorical (like gender), we can just test the effect at each level. When the moderator is continuous, we have to choose values of the moderator (which is ultimately arbitrary). Typically, people choose the mean +/- one standard deviation to represent "typical" and "high/low" values of the moderator. PROCESS by default will choose the 50th and 16th/84th percentiles, which would be the mean +/- one SD in a normal distribution, and is guaranteed to produce probable estimates (since SDs can sometimes be outside the bounds of the data).
+
+Beyond tests, the simple slopes technique also allows us to create a nice, clean visualization. In our example, to keep things simple, we will probe the interaction at the mean +/- one SD of the moderator.
+
+```{r}
+## doing it manually
+# first, obtain critical values of X - the mean +/- one SD
+xneg1sd <- mean(child_trauma$ptsd)-sd(child_trauma$ptsd)
+mx <- mean(child_trauma$ptsd)
+xplus1sd <- mean(child_trauma$ptsd)+sd(child_trauma$ptsd)
+
+# now, obtain critical values of M - the mean +/- one SD
+wneg1sd <- mean(child_trauma$lonely)-sd(child_trauma$lonely)
+mw <- mean(child_trauma$lonely)
+wplus1sd <- mean(child_trauma$lonely)+sd(child_trauma$lonely)
+
+# assemble into data frame
+temp <- data.frame(ptsd = rep(c(xneg1sd, mx, xplus1sd),3), lonely = c(rep(wneg1sd, 3),rep(mw,3),rep(wplus1sd,3)))
+
+# predict values of Y
+ypred <- predict(mod1, temp)
+
+# assemble into final data frame for plotting
+probe_ss_dat <- data.frame(x=temp$ptsd, y = ypred, w = c(rep("Low", 3),rep("Average",3),rep("High",3)))
+
+## doing it in PROCESS...much easier
+# plot = 1 will create a simple slopes by default. It will also generate a dataset you can use to create your own plot
+# moments = 1 will generate values of the moderator at the mean +/- one SD, which is what we want
+process(data = child_trauma, x = "ptsd", w = "lonely", y = "depress", model = 1, moments = 1, plot = 1)
+
+# use the PROCESS output to create the dataset
+x_values <- c(rep(c(16.1275, 28.2124, 40.2972), 3))
+w_values <- factor(c(rep("Low", 3), rep("Average", 3), rep("High", 3)), levels = c("Low", "Average", "High"), ordered = TRUE)
+y_values <- c(9.1877, 7.9735, 6.7593, 10.3260, 10.4055, 10.4851, 11.4643, 12.8375, 14.2108)
+plot_data <- data.frame(x = x_values, y = y_values, w = w_values)
+
+## creating the visualization
+ggplot(data=probe_ss_dat) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=w)) + # create lines
+  geom_point(aes(x=x, y =y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black")) + # end theme code
+  guides(color=guide_legend(title="Loneliness (W)")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  labs(x="PTSD Symptoms",y="Depression") # relabel axes
+```
+
+### The Johnson-Neyman Technique
+
+The JN technique (aka floodlight analysis; Spiller et al., 2013) tells us at what value(s) of a continuous moderator the effect of the focal predictor on the outcome becomes significant. It will always produce two values with a statistically significant interaction effect. That said, the bounds can sometimes be outside the observed range, outside the possible range of the moderator, or outside the bounds of reality (i.e., imaginary numbers). We should only interpret region(s) that are in the observed range of the data (or, at most, in the possible range of the data).
+
+We can use the quadratic formula to derive these points, but PROCESS thankfully does this for us. All you need to do is add **jn=1** to the PROCESS command. PROCESS will only show you the valid solutions. (i.e., no imaginary numbers and only values that fit in the range of the moderator.)
+
+```{r}
+## doing it in PROCESS - we're going to keep it easy
+# jn = 1 will produce the J-N results
+process(data=child_trauma, x = "ptsd", w = "lonely", y = "depress", model = 1, plot = 1, moments = 1, jn = 1)
+
+# JN via process
+# save = 2 will store the results of your JN analysis so we can create a plot
+jnres <- process(data = child_trauma, x = "ptsd",w = "lonely", y = "depress", model = 1, plot =1, jn =1,moments =1, save =2)
+
+# this line will interact with the saved object above to help you create the plot below
+perfx <- jnres[12:33,1];effex <- jnres[12:33,2];llciex <- jnres[12:33,6];ulciex <- jnres[12:33,7]
+
+# J-N plot
+plot(x=perfx,y=effex,type="l",pch=19,lwd=3,col="black",ylab="Conditional Effect of PTSD",xlab="Loneliness (W)")
+points(perfx,llciex,lwd=1.75,lty=2,type="l",col="red")
+points(perfx,ulciex,lwd=1.75,lty=2,type="l",col="red")
+abline(h=0,untf=FALSE,lty=3,lwd=1)
+abline(v=3.313,untf=FALSE,lty=3,lwd=1)
+text(3.5,.1,"3.31",cex=.8)
+```
+
+The region of significance for this problem is values of loneliness that are greater than or equal to 3.31. The conditional effect of PTSD on depression is not significant at any values lower than this (in the range of the data). This applies to 10.62% of the data. The visualization is just there to show this region. (It's hard to interpret so don't worry about it too much.)
+
+## (New) Visualization
+
+This is a complex visualization that combines the simple slopes and JN techniques. It is not going to be expected you can recreate this, because it involves some pretty complex visualization code. But I will show this code to you multiple times in different situations so you become more familiar with it!
+
+```{r}
+### new graph, combination of scatterplot, simple slopes, and J-N
+
+# fit the moderation model
+simpmod <- lm(data=child_trauma,depress~ptsd*lonely)
+
+# grab the coefficients from the model
+b0 <- coef(simpmod)[1];b1 <- coef(simpmod)[2];b2 <- coef(simpmod)[3];b3 <- coef(simpmod)[4]
+
+# simple slope/intercept for "low" loneliness (minus one SD)
+sintlow <- b0 + b2*(mean(child_trauma$lonely)-sd(child_trauma$lonely));sslolow <- b1 + b3*(mean(child_trauma$lonely)-sd(child_trauma$lonely))
+# simple slope/intercept for "medium" loenliness (average)
+sintmed <- b0 + b2*(mean(child_trauma$lonely));sslomed <- b1 + b3*(mean(child_trauma$lonely))
+# simple slope/intercept for "high" loneliness (plus one SD)
+sinthigh <- b0 + b2*(mean(child_trauma$lonely)+sd(child_trauma$lonely));sslohigh <- b1 + b3*(mean(child_trauma$lonely)+sd(child_trauma$lonely))
+# simple slope/intercept for the region of significance
+sintsig1 <- b0 + b2*(3.313);sslosig1 <- b1 + b3*(3.313)
+
+# find observations that are in the loneliness ROS
+child_trauma$modinROS = as.numeric(child_trauma$lonely >= 3.313)
+
+# new visual with all the bells and whistles
+ggplot() + 
+  geom_point(data=child_trauma,aes(y=depress,x=ptsd,color=as.factor(modinROS))) + # add points and color by factor
+  geom_rug(data=child_trauma, aes(y=depress,x=ptsd),outside=TRUE,sides="tr", position="jitter") + # allows for rug plot
+  coord_cartesian(clip = "off") + # allows for rug plot
+  geom_abline(slope=sslolow,intercept=sintlow,color="#031D38", size = 1) + # slope at low levels
+  geom_abline(slope=sslomed,intercept=sintmed,color="#346E9D", size = 1) + # slope at medium levels
+  geom_abline(slope=sslohigh,intercept=sinthigh,color="#55AEF3", size = 1) + # slope at high levels
+  geom_abline(slope=sslosig1,intercept=sintsig1,color="black",linetype="dotted", size =1) + # add region 1
+  theme_bw() +
+  scale_color_manual(name="Loneliness Value (W)", labels = c("Not in ROS","ROS"), values = c("red2","green4")) + 
+  scale_x_continuous(expand = expansion(mult=.005)) +
+  scale_y_continuous(expand = expansion(mult=.005)) + 
+  theme(panel.grid.major = element_blank(), # remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(),
+        legend.background = element_rect(color="black")) + # add axis lines, end theme adjustments
+  labs(x="PTSD Symptoms",y="Depression") + # relabel axes
+  annotate(geom="text",size=4, x=26,y=25,label="10.62% of data in region of significance") # add in ROS info
+```
+
+From this graph, we can see that most of the region of significance (i.e., high values of loneliness) applies to persons who scored high on PTSD and depression. There is nothing unusual we see with the simple slopes on the plot of the data (with regard to assumption violations), so all in all this seems like a fine model. (We can interpret it like we have to this point.)
+
+## Summary
+
+*Tie everything together. What did we learn?*
+
+It seems like loneliness moderates the relationship between PTSD and depression. As loneliness increases, the effect of PTSD on depression increases. Further, it appears that a decrease in loneliness leads to a negative effect of PTSD on depression. In other words, social support is a buffer against many of the negative effects of PTSD for young boys who have experienced traumatic events.
+
+## End of script
