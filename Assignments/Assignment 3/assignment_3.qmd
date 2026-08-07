@@ -1,0 +1,185 @@
+---
+title: "Assignment 3"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Assignment 3: Moderation Analysis
+
+## Description
+
+This assignment is going to test your skills in moderation analysis. (Both simple and more complicated models.) The slides for both units and textbook are **critical** to your success here. Reminder: **You can use PROCESS or hard code the answers to these problems, save for the one involving mean centering.**
+
+**Disclaimer:** Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code. Email me a question or reach out to a classmate if anything is unclear or you need help.
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed.
+
+## The Dataset
+
+The data for this assignment come from a study on women's perceptions of a woman's response to experiencing workplace discrimination. Specifically, this study was an experiment with two conditions: one where participants were told a lawyer protested being passed over for a promotion due to discrimination and one where they were told she did not protest this discrimination. They then measured participants on a variety of constructs including the perceived pervasiveness of sexism in society. This information is valuable to understanding things like victim blaming and our general perceptions of others' behavior. The data we use are simulated to reproduce the results in the original study. The variables we will be looking at are:
+
+-   **protest:** Experimental condition (1 = protest, 0 = no protest; 51.19% in the protest condition)
+
+-   **angry**: Feelings of anger directed toward the lawyer, higher scores = more anger (Range: 1-7)
+
+-   **eval**: Evaluation of how much they like the lawyer, higher scores = more positive evaluation (Range: 1-7)
+
+-   **approp**: A measure of their perception of the appropriateness of the lawyer's response (Range: 1.5-6.75)
+
+-   **sexsim**: Participant's ratings of how pervasive they believe sexism is in society (Range: 3.5-7)
+
+## Hypotheses
+
+The authors hypothesized that those in the protest condition would evaluate the lawyer more favorably. They also hypothesized that perceived pervasiveness of sexism and perceived appropriateness of her response would moderate the relationship. In other words, the variables fit the roles identified below:
+
+**Predictor (**$X$**)**: Protest condition (protest)
+
+M**oderator 1 (**$W_1$**)**: Sexism (sexism)
+
+**Moderator 2 (**$W_2$**)**: Perceived appropriateness of response (approp)
+
+**Outcome (**$Y$**)**: Evaluation of lawyer (eval)
+
+## Questions (30pts total)
+
+### Question 1 (1pt total)
+
+**Data Exploration:** Load ggplot2, jtools, and PROCESS (if you're using it). Read the data in to an object called **lawyer** and summarize it.
+
+```{r}
+
+```
+
+### Question 2 (5pts total)
+
+**Data Preparation:** Recall that centering variables can improve the interpretation of the lower-order effects in a moderation model. You are to add **two variables to the lawyer data frame. Name them sexism_c and approp_c** and make these the mean-centered versions of **sexism** and **approp**, respectively**.** Although PROCESS can do this automatically with center = 1, I want you to have more practice manipulating data frames in R.
+
+```{r}
+
+```
+
+### Question 3 (8pts total)
+
+Write out the equation for a model where sexism_c is the only moderator and protest and eval are the predictor and outcome, respectively. Then for a model where only sexism (uncentered) is the moderator.
+
+#### Q3.a (1pt total)
+
+**Write out the model equations (can be for both models, don't need the error term).**
+
+Y = ...
+
+Y = ...
+
+#### Q3.b (1pt total)
+
+**Fit the models (can be both in same chunk):** Fit the moderation model with sexism centered and without it centered. What changes in the interpretation of these models? (Interpret **all coefficients**, intercepts included.)
+
+```{r}
+
+```
+
+#### Q3.c (6pts total)
+
+**Model results**
+
+**Uncentered model:** What is/is not significant, interpret effects.
+
+**Centered model:** What is/is not significant, interpret effects.
+
+### Question 4 (8pts total)
+
+**Probing the interaction - centered model only:** We're going to probe the interaction only in the centered model using the Johnson-Neyman procedure and the simple slopes procedure. You may use PROCESS or do this manually.
+
+#### Q4.a (4pts total)
+
+**Simple Slopes (at the mean +/- one SD)**
+
+```{r}
+# do significance tests at the mean +/- one standard deviation
+
+# create a plot with the simple slopes
+
+```
+
+What can we say as a result of this investigation? Interpret the interaction.
+
+#### Q4.b (4pts total)
+
+**Johnson-Neyman (no plot)**
+
+```{r}
+# do the JN technique
+
+# do not create a plot for this 
+
+```
+
+What can we interpret as a result of this investigation? Write out the region of significance and what this means for the interaction.
+
+### Question 5 (8pts total)
+
+**Multiple additive moderation:** Let's try to expand the model. Let's write out the equation and fit a model where sexism_c and approp_c are **additive centered moderators.**
+
+#### Q5.a (1pt total)
+
+Y = ...
+
+#### Q5.b (1pt total)
+
+**Fit the model.**
+
+```{r}
+
+```
+
+#### **Q5.c (6pts total)**
+
+**Model results (write-up)**: What is/is not significant? Is this model worth running (why or why not)?
+
+**Note:** There is no need to probe/visualize this model. (It's beyond the scope of this assignment.)
+
+### Bonus (1pt total)
+
+**Comprehensive visualization of simple moderation model:** Using the ggplot2 code template below (and examples from past lectures), create a comprehensive visualization combining the simple slopes and Johnson-Neyman procedures. Save the image and upload it to the assignment submission portal on the bonus submission question. You should only need to plug in values as appropriate here. Don't forget to change labels as appropriate.
+
+```{r}
+## new graph, combination of scatterplot, simple slopes, and J-N
+simpmod <- lm(...)
+b0 <- coef(simpmod)[1];b1 <- coef(simpmod)[2];b2 <- coef(simpmod)[3];b3 <- coef(simpmod)[4]
+sintlow <- b0 + b2*(mean(df$moderator)-sd(df$moderator));sslolow <- b1 + b3*(mean(df$moderator)-sd(df$moderator))
+sintmed <- b0 + b2*(mean(df$moderator));sslomed <- b1 + b3*(mean(test$moderator))
+sinthigh <- b0 + b2*(mean(df$moderator)+sd(df$moderator));sslohigh <- b1 + b3*(mean(test$moderator)+sd(test$moderator))
+sintsig1 <- b0 + b2*(REGION_OF_SIG_VALUE);sslosig1 <- b1 + b3*(REGION_OF_SIG_VALUE)
+test$modinROS <- as.numeric(test$moderator >= REGION_OF_SIG_VALUE)
+
+# new visual with all the bells and whistles
+ggplot() + 
+  #geom_boxplot(data=test, aes(y= eval,x= protest,color=as.factor(modinROS))) +
+  geom_point(data=df, aes(y = , x = , color = as.factor(modinROS)), position=position_jitterdodge(dodge=0.6)) + # add points and color by factor
+  geom_rug(data=df, aes(y= ,x= ),outside=TRUE,sides="tr", position="jitter") + # allows for rug plot
+  coord_cartesian(clip = "off") + # allows for rug plot
+  geom_abline(slope=sslolow,intercept=sintlow,color="#031D38", size = 1) + # slope at low levels
+  geom_abline(slope=sslomed,intercept=sintmed,color="#346E9D", size = 1) + # slope at medium levels
+  geom_abline(slope=sslohigh,intercept=sinthigh,color="#55AEF3", size = 1) + # slope at high levels
+  geom_abline(slope=sslosig1,intercept=sintsig1,color="black",linetype="dotted", size =1) + # add region 1
+  theme_bw() +
+  scale_color_manual(name="Moderator Name Value (W)", labels = c("Not in ROS","ROS"), values = c("red2","green4")) + 
+  #scale_x_continuous(expand = expansion(mult=.005)) +
+  #scale_y_continuous(expand = expansion(mult=.005)) + 
+  theme(panel.grid.major = element_blank(), # remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(),
+        legend.background = element_rect(color="black")) + # add axis lines, end theme adjustments
+    scale_x_continuous(breaks = c(0,1), labels = c("No Protest","Protest")) + # change values on x-axis
+  labs(x="change to predictor name",y="change to outcome name") # relabel axes
+```
+
+## The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal.
+
+Thank you! :)
