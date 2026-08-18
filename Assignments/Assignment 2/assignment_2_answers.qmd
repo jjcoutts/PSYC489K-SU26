@@ -1,0 +1,342 @@
+---
+title: "Assignment 2 (Answers)"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# SOLUTIONS - Assignment 2: Mediation Analysis
+
+## Description
+
+This assignment is going to test your skills in mediation analysis. (Both simple and more complicated models.) The slides for both units and textbook are **critical** to your success here. Reminder: **You can use PROCESS or hard code the answers to these problems.**
+
+**Disclaimer:** Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code. Email me a question or reach out to a classmate if anything is unclear or you need help.
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed. (See Assignment 1 for formatting guidelines/recommendations.)
+
+## The Dataset
+
+The data for this assignment come from a study on product weight and perceptions of quality. Specifically, this study investigated whether artificially weighting chocolate wrappers caused people to perceive the flavor as more intense, and thus, make them more likely to purchase it. This information is valuable to both businesses and consumers, as the former want to sell products and the latter want to avoid tricks that business can play to increase sales without increasing quality. The data we use are the original data from the study. The variables we will be looking at are:
+
+-   **flav_intense**: Ratings of intensity/potency of flavor, high scores = more intense (Range: 1-7)
+
+-   **flav_eval**: Ratings of flavor, higher scores = better evaluation (Range: 1-7)
+
+-   **packweight**: Experimental manipulation, 1 = light packaging, 2 = heavy packaging
+
+-   **purchase**: Willingness to pay where higher scores = greater willingness (Range: 0-10)
+
+-   **sex**: A participant's biological sex (56.12% female)
+
+-   **age**: A participant's age at the time of the study (Range: 17-36)
+
+## Hypotheses
+
+The authors hypothesized that package weight would predict likelihood to purchase the chocolate, but only first because it would increase intensity and enjoyment of flavor. They wanted to control for sex and age in all model equations. In other words, the variables fit the roles identified below:
+
+**Predictor (**$X$**):** Package weight (packweight)
+
+**Mediator 1 (**$M_1$**):** Flavor intensity (flav_intense)
+
+**Mediator 2 (**$M_2$**):** Flavor evaluation (flav_eval)
+
+**Outcome (**$Y$**):** Purchase likelihood (purchase)
+
+**Covariates:** Age and sex
+
+We will be using **bootstrapping** for all analyses. Remember that if you use PROCESS, you only need to add contrast = 1 (raw difference) or contrast = 2 (difference in absolute values) to compare indirect effects.
+
+## Questions (30pts total)
+
+### Question 1 (1pt total)
+
+**Data Exploration:** Load ggplot2, jtools, and PROCESS (if you're using it). Read the data in to an object called **chocolate** and summarize it.
+
+```{r}
+# load  packages
+library(ggplot2) # for plots
+library(jtools) # to modify plots
+
+# read in data
+chocolate = read.csv(file="chocolate_hw2.csv") # change to where it is on your computer
+source("process_V5.R") # this allows PROCESS to render without needing to open it and run it yourself. MAKE SURE THE FILE PATH ROUTES TO WHERE IT IS ON YOUR COMPUTER OR JUPYTER
+
+# summarize data
+summary(chocolate)
+```
+
+### Question 2 (8pts total)
+
+**Two simple mediation models:** We're going to start by fitting two simple mediation models to the data: one with flavor intensity as the mediator and one with flavor evaluation as a mediator. **Remember to control for sex and age and compare the indirect effects if it is possible.** Please follow this framework:
+
+#### Q2.a (2pts total)
+
+**Write out the model equations (can be for both models, don't need the error term).**
+
+$M_{intense} = d_{intense} + aX + cov_1Age+cov_2Sex$
+
+$Y = d_y + c'X + bM_{intense} + cov_1Age+cov_2Sex$
+
+$M_{eval} = d_{eval} + aX + cov_1Age+cov_2Sex$
+
+$Y = d_y + c'X + bM_{eval} + cov_1Age+cov_2Sex$
+
+#### Q2.b (1pt total)
+
+**Fit the models (can be both in same chunk).**
+
+```{r}
+### Doing in manually 
+
+# set the bootstrap parameters
+set.seed(489) # set seed to reproduce my results
+B = 5000 # number of bootstrap resamples
+n = nrow(chocolate) # sample size 
+ie_eval <- rep(NA, B) # empty vector for first indirect effect
+ie_intense <- rep(NA,B) # empty vector for second indirect effect
+
+# start bootstrapping
+for(i in 1:B){
+ boot_dat <- chocolate[sample(1:n, n, replace = TRUE),] # resample from the OG dataset
+ # flav_eval model
+ a_e <- coef(lm(flav_eval~packweight + sex + age, data = boot_dat))[2] # a path with bootstrap data
+ b_e <- coef(lm(purchase ~ packweight + flav_eval + sex + age, data = boot_dat))[3] # b path with bootstrap data
+ ie_eval[i] <- a_e*b_e # indirect effect through evaluation
+ 
+ # flav_intensity model
+ a_i <- coef(lm(flav_intense~packweight + sex + age, data = boot_dat))[2] # a path with bootstrap data
+ b_i <- coef(lm(purchase ~ packweight + flav_intense + sex + age, data = boot_dat))[3] # b path with bootstrap data
+ ie_intense[i] <- a_i*b_i # indirect effect through intensity
+}
+
+# ci through eval
+quantile(ie_eval, c(.025, .975))
+# ci through intensity
+quantile(ie_intense, c(.025, .975))
+```
+
+```{r}
+### Doing the above through PROCESS
+# through eval
+process(data=chocolate, y = "purchase", m = "flav_eval", x = "packweight", cov=c("sex","age"),model = 4, seed = 489, progress = 0)
+# through intensity
+process(data=chocolate, y = "purchase", m = "flav_intense", x = "packweight", cov=c("sex","age"),model = 4, seed = 489, progress = 0)
+```
+
+#### Q2.c (5pts total)
+
+**Model results (Write-up can be for both models):** What is/is not significant, interpret important effects, can we say they're different? Strengths/weaknesses?
+
+**For flavor evaluation**
+
+Note: Sex and age were included as a covariate in all model equations.
+
+Overall, those who were in the heavier packaging condition were higher in their evaluations of flavor than those in the lighter packaging condition ($a = 0.653, t = 2.500, p = .014$). This increase in flavor evaluation led to an increase in willingness to purchase the product after controlling for condition ($b = 0.415, t = 3.503, p < .001$). Those in the heavy wrapper condition were 0.271 units higher in their willingness to purchase as a result of the positive effect on flavor evaluation, which had a resulting positive impact on willingness to purchase after controlling for age and sex, ($ab = 0.271$, 95% percentile bootstrap CI = \[0.056, 0.538\]). After accounting for the mechanism above, the weight of the package did not have an effect on willingness to purchase, ($c' = -0.215, t = 0.585, p = .560$).
+
+**For flavor intensity**
+
+Note: Sex and age were included as a covariate in all model equations.
+
+Overall, those who were in the heavier package condition were higher in their perceived intensity of flavor than those in the lighter package condition ($a = 0.696, t = 3.060, p = .002$). This increase in flavor intensity went on to increase willingness to purchase ($b = 0.541, t = 4.037, p < .001$) after controlling for condition. Those in the heavy wrapper condition were 0.377 units higher in their willingness to purchase as a result of the positive effect on flavor intensity, which had a resulting positive impact on willingness to purchase after controlling for age and sex, ($ab = 0.377$, 95% percentile bootstrap CI = \[0.133, 0.674\]). After accounting for the mechanism above, the weight of the package did not have an effect on willingness to purchase ($c' = -0.321, t = -0.876, p = .383$).
+
+What these models gain in simplicity, they lose in simplicity, It is very likely the perceptions of flavor and perceptions of intensity are higher correlated, if not causally related, and since these are separate models, this potential correlation is not accounted for. It is likely that a parallel or serial mediation model would be better.
+
+### Question 3 (8pts total)
+
+**Parallel Mediation:** We're going to fit a parallel multiple mediation model to the data where flavor intensity and flavor evaluation are mediators. Remember to control for sex and age and compare the indirect effects if it is possible. Please follow this framework:
+
+#### Q3.a (2pts total)
+
+**Write out the model equations (don't need the error term).**
+
+$M_1 = d_{m_{1}} + a_1X+ cov_1Age+cov_2Sex$
+
+$M2 = d_{m_{2}} + a_2X+ cov_1Age+cov_2Sex$
+
+$Y = d_y + c'X + b_1M_1 + b_2M_2+ cov_1Age+cov_2Sex$
+
+#### Q3.b (1pt total)
+
+**Fit the model.**
+
+```{r}
+### Doing in manually 
+
+# set the bootstrap parameters
+set.seed(489) # set seed to reproduce my results
+B = 5000 # number of bootstrap resamples
+n = nrow(chocolate) # sample size 
+ie_p_eval <- rep(NA, B) # empty vector for first indirect effect
+ie_p_intense <- rep(NA,B) # empty vector for second indirect effect
+ie_contrast <- rep(NA, B)
+
+# start bootstrapping
+for(i in 1:B){
+ boot_dat <- chocolate[sample(1:n, n, replace = TRUE),] # resample from the OG dataset
+ # flav_eval model
+ a1ev <- coef(lm(flav_eval~packweight + sex + age, data = boot_dat))[2] # a1 path with bootstrap data
+ a2in <- coef(lm(flav_intense~packweight + sex + age, data = boot_dat))[2] # a2 path with bootstrap data
+ b1ev <- coef(lm(purchase ~ packweight + flav_eval + flav_intense + sex + age, data = boot_dat))[3] # b1 path with bootstrap data
+ b2in <- coef(lm(purchase ~ packweight + flav_eval + flav_intense + sex + age, data = boot_dat))[4] # b2 path with bootstrap data
+ ie_p_eval[i] <- a1ev*b1ev # indirect effect through evaluation
+ ie_p_intense[i] <- a2in*b2in # indirect effect through intensity
+ ie_contrast[i] <- a1ev*b1ev-a2in*b2in # indirect effect through eval minus intensity 
+}
+
+# ci through eval
+quantile(ie_p_eval, c(.025, .975))
+# ci through intensity
+quantile(ie_p_intense, c(.025, .975))
+# ci for contrast
+quantile(ie_contrast, c(.025, .975))
+```
+
+```{r}
+### Doing the above model through PROCESS
+# through eval and intensity
+process(data=chocolate, y = "purchase", m = c("flav_intense","flav_eval"), x = "packweight", cov=c("sex","age"),model = 4, seed = 489, progress = 0, contrast =1,total=1)
+```
+
+#### Q3.c (5pts total)
+
+**Model results (write-up):** What is/is not significant, interpret important effects, can we say they're different?
+
+Note: Sex and age were included as a covariate in all model equations.
+
+Overall, those who were in the heavier package condition were 0.696 units higher in their perceived intensity of flavor than those in the lighter package condition ($a_1 = 0.696, t = 3.060, p = .003$). Additionally, those who were in the heavier package condition were 0.653 units higher in their evaluations of flavor than those in the lighter package condition ($a_2 = 0.653, t = 2.500, p = .014$). The increase in flavor intensity went on to increase increase willingness to purchase, regardless of their condition or flavor evaluation ($b_1 = 0.434, t = 3.120, p = .002$). The increase in flavor evaluation also increased one's willingness to purchase after controlling for flavor intensity and condition, ($b_2 = 0.295, t = 2.432, p = .016$).
+
+After controlling for flavor evaluation, sex, and age, those in the heavy wrapper condition were 0.302 units higher in their willingness to purchase as a result of the positive effect on flavor intensity, which had a resulting positive impact on willingness to purchase. This effect was significant, ($a_1b_1 = 0.302$, 95% percentile bootstrap CI = \[0.098, 0.568\]). After controlling for flavor intensity, sex, and age, those in the heavy wrapper condition were 0.192 units higher in their willingness to purchase as a result of the positive effect on flavor evaluation, which had a resulting positive impact on willingness to purchase. This effect was significant, ($a_2b_2 = 0.192$, 95% percentile bootstrap CI = \[0.014, 0.414\]).
+
+Using a test of the raw difference because the indirect effects were the same sign, the indirect effect through intensity was not significantly different than the effect through evaluation, difference = -0.110, 95% percentile bootstrap CI = \[-0.451, 0.181\]. We do not have evidence that one of these is more influential in affecting purchasing decisions than the other.
+
+After accounting for both mechanisms above, the weight of the package did not have an effect on willingness to purchase ($c' = -0.438., t = -1.206, p = .230$).
+
+A strength of the model is that it likely better represents the real world. It is likely that something like package weight would affect multiple things (i.e., act through multiple mechanisms) to increase one's willingness to purchase a product (assuming it does at all).
+
+A limitation is that it is unclear whether package weight acts through these in individually (like in a parallel model) or in sequence (like in a serial model). It's also almost guaranteed this model is still too simple.
+
+### Question 4 (8pts total)
+
+**Serial Mediation:** We're going to fit a serial multiple mediator model, where the order is $X$ -\> $M_1$ -\> $M_2$ -\> $Y$ (i.e., packweight -\> flav_intense -\> flav_eval -\> purchase). Remember to control for sex and age and compare the indirect effects if it is possible. Please follow this framework:
+
+#### Q4.a (2pts total)
+
+**Write out the model equations (don't need the error term).**
+
+$M_1 = d_{m_{1}} + a_1X+ cov_1Age+cov_2Sex$
+
+$M_2 = d_{m_{2}} + a_2X + iM_1+ cov_1Age+cov_2Sex$
+
+$Y = d_Y + c'X + b_1M_1 + b_2M_2+ cov_1Age+cov_2Sex$
+
+The serial indirect effect we are looking for is $a_1ib_2$.
+
+#### Q4.b (1pt total)
+
+**Fit the model.**
+
+```{r}
+### Doing in manually 
+
+# set the bootstrap parameters
+set.seed(489) # set seed to reproduce my results
+B = 5000 # number of bootstrap resamples
+n = nrow(chocolate) # sample size 
+ie_flavint <- rep(NA,B) # for ie through intensity
+ie_flaveval <- rep(NA,B) # for ie through eval
+ie_s <- rep(NA, B) # empty vector for first indirect effect
+con_int_serial <- rep(NA,B) # contrast vector 
+con_eval_serial <- rep(NA,B) # contrast vector 
+con_int_eval <- rep(NA,B) # contrast vector 
+
+# start bootstrapping
+for(i in 1:B){
+ boot_dat <- chocolate[sample(1:n, n, replace = TRUE),] # resample from the OG dataset
+ # flav_eval model
+ a1 <- coef(lm(flav_intense~packweight + sex + age, data = boot_dat))["packweight"] # a1 path with bootstrap data
+ a2 <- coef(lm(flav_eval ~ packweight + flav_intense + sex + age, data = boot_dat))["packweight"] # b1 path with bootstrap data
+ s2 <- coef(lm(flav_eval ~ packweight + flav_intense + sex + age, data = boot_dat))["flav_intense"] # b1 path with bootstrap data
+ b1 <- coef(lm(purchase ~ packweight + flav_intense + flav_eval + sex  + age, data = boot_dat))["flav_intense"]
+ b2 <- coef(lm(purchase ~ packweight + flav_intense + flav_eval + sex + age, data = boot_dat))["flav_eval"] # b2 path with bootstrap data
+ ie_flavint[i] <- a1*b1
+ ie_s[i] <- a1*s2*b2 # indirect effect through intensity, then evaluation
+ ie_flaveval[i] <- a2*b2
+ con_int_serial[i] <- abs(ie_flavint[i])-abs(ie_s[i])
+ con_eval_serial[i] <- abs(ie_flaveval[i])-abs(ie_s[i])
+ con_int_eval[i] <- abs(ie_flavint[i])-abs(ie_flaveval[i])
+}
+
+# serial ci through intensity then evaluation
+quantile(ie_s, c(.025, .975))
+# serial ci through intensity only 
+quantile(ie_flavint, c(.025, .975))
+# serial ci through eval only
+quantile(ie_flaveval, c(.025, .975))
+# contrast of int and serial ie
+quantile(con_int_serial, c(.025, .975))
+# contrast of eval and serial ie
+quantile(con_eval_serial, c(.025, .975))
+# contrast of int and eval ie
+quantile(con_int_eval, c(.025, .975))
+```
+
+```{r}
+### Doing the above model through PROCESS
+# through intensity, then eval
+process(data=chocolate, y = "purchase", m = c("flav_intense","flav_eval"), x = "packweight", cov=c("sex","age"), model = 6, seed = 489, progress = 0, contrast =2)
+```
+
+#### Q3.c (5pts total)
+
+**Model results (write-up):** What is/is not significant, interpret important effects, can we say they're different?
+
+Note: Sex and age were included as a covariate in all model equations.
+
+Overall, those who were in the heavier package condition were higher in their perceived intensity of flavor than those in the lighter package condition ($a_1 = 0.696, t = 3.060, p = .002$). This increase in flavor intensity went on to increase flavor evaluation, controlling for package weight, ($i = 0.366, t = 3.893, p < .001$). Those with more favorable flavor evaluations were not willing to purchase the product after controlling for flavor intensity and package weight, ($b_2 = 0.295, t = 2.432, p =.016$). Those in the heavy wrapper condition were 0.075 units higher in their willingness to purchase as a result of the positive effect on flavor intensity, which increased flavor evaluation, which increased willingness to purchase. This serial indirect effect was significant, ($a_1ib_2 = 0.075$, 95% percentile bootstrap CI = \[0.005, 0.180\]). The specific indirect effect through flavor intensity alone (controlling for age, sex, and flavor evaluation) was statistically significant, $a_1b_1 = 0.302$, 95% percentile bootstrap CI = \[0.098, 0.568\]. The specific indirect effect through flavor evaluation alone (controlling for age, sex, and flavor intensity) was not statistically significant, $a_2b_2 = 0.117$, 95% percentile CI = \[-0.035, 0.310\]. After accounting for the mechanisms above, the weight of the package did not have an effect on willingness to purchase ($c' = -0.438., t = -1.206, p = .230$).
+
+Because we are most interested in the serial process, the serial indirect effect was compared to both specific indirect effects. Since all effects were positive, the raw difference was used as a contrast. The indirect effect through intensity alone ($a_1b_1$) was significantly larger than the serial indirect effect (difference = 0.227, 95% percentile bootstrap CI = \[0.037, 0.494\]). The indirect effect through flavor evaluation alone ($a_2b_2$) was not sigificantly different from the serial indirect effect, difference = 0.042, 95% percentile confidence interval = \[-0.111, 0.230\].
+
+The strength of this model is that it is the most complex we've run so far. It could make sense that flavor intensity would lead to an increase in flavor evaluation, and if a flavor was both more intense and well received, then someone would be more willing to purchase the product.
+
+A limitation is that the sequential ordering may not be appropriate. Intensity of flavor could mean a bad thing if it is not perceived as enjoyable. Thus, it may be that flavor intensity is acting through a different pathway than flavor evaluation.
+
+### Question 5 (5pts total)
+
+**Model selection:** NOT BASED ON THE SIGNIFICANCE OF THE RESULTS, but rather, on theoretical rationale/argument, which model do you think best captures reality and why? What would you recommendation be to a company that came to you asking if they should create heavier wrappers for their chocolate bars?
+
+I feel like the parallel mediation model is the best of the three we ran here. Although it seems reasonable that flavor intensity may impact flavor evaluation, I can also see the package weight affecting these channels individually. Perhaps a more intense flavor leads to a perception of *quality* instead. (As mentioned above, someone may not like the flavor, so a more intense flavor may actually decrease likelihood of purchasing depending on the person.)
+
+### Bonus (1pt total)
+
+**Data Visualization/Conceptual Diagram of Chosen Model:** Using the ggplot2 code below, visualize whatever paths are part of the indirect effect(s) from your chosen model. Copy/paste these plots onto a conceptual diagram for your hypotheses and fill in the paths with estimates. This diagram can be turned in as a .pptx, .jpg, or another file type on the bonus submission question.
+
+```{r}
+# a1 - should be a boxplot because it's a dichotomous variable
+ggplot(data=chocolate, aes(x= as.factor(packweight), y = flav_intense)) + 
+  geom_boxplot() + 
+  jtools::theme_apa()
+
+# a2 - should be a boxplot because it's a dichotomous variable
+ggplot(data=chocolate, aes(x= as.factor(packweight), y = flav_eval)) + 
+  geom_boxplot() + 
+  jtools::theme_apa()
+
+# b1
+ggplot(data=chocolate, aes(x= flav_intense, y = purchase)) + 
+  geom_point() + 
+  jtools::theme_apa()
+
+# b2
+ggplot(data=chocolate, aes(x= flav_eval, y = purchase)) + 
+  geom_point() + 
+  jtools::theme_apa()
+```
+
+The figure is in the assignment answers section of the modules page.
+
+# The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal.
+
+Thank you! :)
