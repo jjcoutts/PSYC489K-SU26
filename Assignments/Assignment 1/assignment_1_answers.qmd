@@ -1,0 +1,201 @@
+---
+title: "Assignment 1 (Answers)"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# SOLUTIONS - Assignment 1: Linear Regression
+
+## Instructions
+
+This assignment is going to test your skills in R and regression analysis. The review slides for both units are going to be **extremely** helpful to you while completing this assignment. Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code and it's against class policy. Email me a question or reach out to a classmate if anything is unclear or you need help!
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed. The assignment should look something like below:
+
+**Question 1 - Text from question 1. (MAKE THIS ONE OF THE HEADER STYLES SO IT'S EASIER TO READ.)**
+
+Code chunk, if applicable.
+
+*Text answering question, if applicable.*
+
+**Question 2 - Text from question 2. (MAKE THIS ONE OF THE HEADER STYLES SO IT'S EASIER TO READ.)**
+
+.... and so on.
+
+## Questions (30 pts total)
+
+The data for this assignment come from a mixed-methods study on young adults' perceptions of their parents' sexual communication with them as a child (e.g., did they have "the talk"?). The data presented are a subset from the larger questionnaire given to participants, who were recruited by convenience sampling, came into a lab, completed a questionnaire, and then an interview. The variables in the dataset are as follows:
+
+-   **Age**: Participant's age (Range: 19-22)
+
+-   **Sex**: Participant's sex (55% female)
+
+-   **cesd_TOT**: Depressive symptomatology (Center for Epidemiological Studies--Depression Scale, Range: 0-36). HIGHER scores = MORE depression symptoms
+
+-   **soc_sup_TOT**: Self-reported social support (Range: 3.83-7). HIGHER scores = MORE social support
+
+-   **sex_anx_TOT**: Self-reported sexual anxiety (Range: 10-23). HIGHER scores = LOWER anxiety
+
+-   **sex_att_TOT**: Self-reported attitudes toward sexuality (Range: 4-37). HIGHER scores = MORE NEGATIVE attitudes
+
+### Question 1 (1pt total)
+
+Read the data in to an object called **sexuality** and summarize it.
+
+```{r}
+# read in the data
+sexuality <- read.csv(file="sexuality_hw1.csv")
+
+# now summarize it
+summary(sexuality) # produces summary statistics
+```
+
+### Question 2 (2pts total)
+
+**Creating and overwriting a column:** Overwrite the existing Sex column by assigning it the current sex column as a factor. Verify that it worked using the is.factor() command on the indexed column (e.g., is.factor(df\$col_name)).
+
+```{r}
+sexuality$Sex <- as.factor(sexuality$Sex) # The left hand side retrieves the Participant sex column and the right hand side overwrites it. 
+is.factor(sexuality$Sex) # will produce TRUE if it's a factor. It is. 
+```
+
+### Question 3 (6pts total)
+
+**Assumption checking (SLR):** We will be fitting a model where depression is the **outcome** and sexual anxiety is the **predictor**. Use this to answer all subquestions in Question 3.
+
+#### Q3.a (1pt total)
+
+Use the ggplot2 code below to create a scatterplot for the relationship between sexual anxiety and depression. (Hint: You may need to do something with ggplot2 and jtools for this code to run
+
+```{r}
+library(ggplot2) # You need to add this, or else it won't run
+library(jtools) # allows us to use the theme_apa() command. 
+ggplot(data=sexuality, aes(x = sex_anx_TOT, y = cesd_TOT)) + # simply fill in the variable names to cmoplete this task
+  geom_point() + jtools::theme_apa()
+```
+
+#### Q3.b (2pts total)
+
+Using the slides as a reference (if needed), create a histogram AND qqplot for the residuals of this model.
+
+```{r}
+anx_model <- lm(cesd_TOT~sex_anx_TOT, data = sexuality) # create model object so we can pull the residuals
+hist(resid(anx_model)) # looking for bell-shaped curve
+qqnorm(resid(anx_model)); qqline(resid(anx_model)) # looking for a straight line
+```
+
+#### Q3.c (3pts total)
+
+Using the two plots above, comment on the assumptions for simple linear regression discussed in lecture. Should we run the model?
+
+**Normality:** Normality seems like an okay assumption. The qqplot shows a straight enough line and the histogram of the residuals is an approximate bell curve. It could be better, but it's not violated enough to be of concern.
+
+**Linearity**: Linearity seems like a reasonable assumption given the scatterplot since a straight line appears to be the best summary of the data's trend.
+
+**Homoskedasticity**: Seems like a reasonable assumption. The variance seems constant in X as Y changes (i.e., there's no funnel shape).
+
+All three model assumptions seemed reasonable enough to proceed with the model.
+
+### Question 4 (6pts total)
+
+**Model fitting and interpretation (SLR):**
+
+#### Q4.a (1pt total)
+
+Write two-tailed null and alternative hypotheses for the effect of sexual anxiety. Use **parameters**, [not words or sample notation]{.underline}.
+
+$H_0: \beta_1 = 0$ where $\beta_1$ represents the population effect of sexual anxiety.
+
+$H_1: \beta_1 \neq 0$
+
+#### Q4.b (5pts total)
+
+Fit the model described above to the sexuality data. Interpret the coefficients for the intercept and predictor and report the coefficient for sex_anx_TOT **in APA format** (shown in the slides). Do you reject or fail-to-reject the null?
+
+```{r}
+anx_model <- lm(cesd_TOT~sex_anx_TOT, data =sexuality) # create model object so we can pull the residuals
+summary(anx_model) # produces model estimates
+```
+
+People with no sexual anxiety are expected to have a depression score of 48.91. This effect is significant (b0 = 48.91, *t* = 4.599, *p* \< .001). People with more sexual anxiety reported more depressive symptoms. For each one-unit increase in sexual anxiety, depression decreased by 1.953 units (b1 = -1.953, *t* = -3.119, *p* = .006). We reject the null that the effect of sexual anxiety is zero.
+
+### Question 5 (6pts total)
+
+**Assumption checking (MLR):**
+
+We're going to switch gears and consider a more plausible model. Please enter Age, Sex, sex_att_TOT, and soc_sup_TOT to the model (in addition to sex anxiety). Age and Sex will be treated as covariates. We actually don't care whether these are significant, we just want to make sure our estimates aren't impacted by them. We will only worry about reporting soc_sup_TOT, sex_anx_TOT, and sex_att_TOT.
+
+Using the slides as a reference (if needed), check and comment on the assumptions for multiple regression. (Hint: There should be two assumptions checked.) Should we run the model?
+
+```{r}
+mult_anx_model <- lm(cesd_TOT~Age+Sex+sex_anx_TOT + sex_att_TOT+ soc_sup_TOT, data = sexuality) # multiple regression model with each of the predictors and covariates entered
+
+hist(resid(mult_anx_model)) # histogram of model residuals, look for bell curve
+qqnorm(resid(mult_anx_model)); qqline(resid(mult_anx_model)) # QQ plot of model residuals, look for bell curve
+
+# plot of residuals by fitted values to assess linearity 
+plot(resid(mult_anx_model), predict(mult_anx_model))
+```
+
+The assumption of normality seems reasonable. The qqplot line is straight enough and the histogram of the residuals looks more bell-curve like than the simple linear regression model. Additionally, a plot of the residuals by the predicted values does not show any funnel/cone shape, suggesting that homogeneity of variance is a reasonable assumption.
+
+### Question 6 (6pts total)
+
+**Model fitting and interpretation (MLR):**
+
+#### Q6.a (0.5pts total)
+
+Write two-tailed null and alternative hypotheses for each parameter that we are interested in. (There should be three since we have three predictors.)
+
+$H_0: \beta_1 = 0$ where $\beta_1$ represents the population effect of social support.
+
+$H_1: \beta_1 \neq 0$
+
+$H_0: \beta_2 = 0$ where $\beta_2$ represents the population effect of sexual anxiety.
+
+$H_1: \beta_2 \neq 0$
+
+$H_0: \beta_3 = 0$ where $\beta_3$ represents the population effect of sexual attitudes.
+
+$H_1: \beta_3 \neq 0$
+
+#### Q6.b (0.5pts total)
+
+Fit the multiple regression model to the data and produce a summary of the results.
+
+```{r}
+summary(mult_anx_model) # produces the model summary
+```
+
+#### Q6.c (2.5pts total)
+
+**Interpret only the coefficients** for sex_anx_TOT and soc_sup_TOT. (Don't worry about reporting significance just yet.)
+
+As social support increased by one unit, participant depression decreased by 2.187 units after controlling for participant age, sex, sexual attitudes and sexual anxiety.
+
+As sexual anxiety increased by one unit, participant depression *increased* by 2.404 units assuming participants were equal on age, sex, sexual attitudes, and social support. (The estimate is negative because lower values on the anxiety measure mean higher levels of anxiety.)
+
+As sexual attitudes became one unit more positive, one's depressive symptoms *decreased* by 0.798 units controlling for age, sex, sexual anxiety, and social support.
+
+#### Q6.d (2.5pts total)
+
+**CREATE CONFIDENCE INTERVALS** (manually, or using a command from the slides) for the model parameters. Are the effects for **the three predictors above** significant from these confidence intervals? Why or why not?
+
+```{r}
+confint(mult_anx_model) # generates confidence intervals for each parameters identified in the model object
+```
+
+Only the effects for sexual attitudes and anxiety were significant. We know this because they were the only two confidence intervals that excluded zero. We fail-to-reject the null for the effect of social support.
+
+### Question 7 (3pts total)
+
+**Overall conclusions:** What can we say about perceptions about sexuality and mental well-being given this study? Are there any concerns we should have about statistical conclusion validity?
+
+Based on this investigation, it seems like sexual communication with children is important, because it can impact children's comfort levels with and anxiety about sexuality, which can have deleterious effects on your mental health. This effect transcends any buffering effects from social support.
+
+## The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal.
+
+Thank you! :)
