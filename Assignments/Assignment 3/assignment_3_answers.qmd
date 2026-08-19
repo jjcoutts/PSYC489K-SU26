@@ -1,0 +1,286 @@
+---
+title: "Assignment 3 (Answers)"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# SOLUTIONS - Assignment 3: Moderation Analysis
+
+## Description
+
+This assignment is going to test your skills in moderation analysis. (Both simple and more complicated models.) The slides for both units and textbook are **critical** to your success here. Reminder: **You can use PROCESS or hard code the answers to these problems, save for the one involving mean centering.**
+
+**Disclaimer:** Do not use techniques or code we didn't learn in class (e.g., from an obscure package) and do not give me code written by ChatGPT. I know how it writes code. Email me a question or reach out to a classmate if anything is unclear or you need help.
+
+Write answers in this Quarto document as text and add code chunks using the **insert** tab above as needed.
+
+## The Dataset
+
+The data for this assignment come from a study on women's perceptions of a woman's response to experiencing workplace discrimination. Specifically, this study was an experiment with two conditions: one where participants were told a lawyer protested being passed over for a promotion due to discrimination and one where they were told she did not protest this discrimination. They then measured participants on a variety of constructs including the perceived pervasiveness of sexism in society. This information is valuable to understanding things like victim blaming and our general perceptions of others' behavior. The data we use are simulated to reproduce the results in the original study. The variables we will be looking at are:
+
+-   **protest:** Experimental condition (1 = protest, 0 = no protest; 51.19% in the protest condition)
+
+-   **angry**: Feelings of anger directed toward the lawyer, higher scores = more anger (Range: 1-7)
+
+-   **eval**: Evaluation of how much they like the lawyer, higher scores = more positive evaluation (Range: 1-7)
+
+-   **approp**: A measure of their perception of the appropriateness of the lawyer's response (Range: 1.5-6.75)
+
+-   **sexsim**: Participant's ratings of how pervasive they believe sexism is in society (Range: 3.5-7)
+
+## Hypotheses
+
+The authors hypothesized that those in the protest condition would evaluate the lawyer more favorably. They also hypothesized that perceived pervasiveness of sexism and perceived appropriateness of her response would moderate the relationship. In other words, the variables fit the roles identified below:
+
+**Predictor (**$X$**)**: Protest condition (protest)
+
+M**oderator 1 (**$W_1$**)**: Sexism (sexism)
+
+**Moderator 2 (**$W_2$**)**: Perceived appropriateness of response (approp)
+
+**Outcome (**$Y$**)**: Evaluation of lawyer (eval)
+
+## Questions (30pts total)
+
+### Question 1 (1pt total)
+
+**Data Exploration:** Load ggplot2, jtools, and PROCESS (if you're using it). Read the data in to an object called **lawyer** and summarize it.
+
+```{r}
+# load required packages
+library(ggplot2)
+library(jtools)
+source("process_v5.R") # change this to the location on your computer/jupyter
+
+# read in the lawyer data
+lawyer <- read.csv("lawyer_hw3.csv") # change this to the location on your computer/jupyter
+summary(lawyer)
+```
+
+### Question 2 (5pts total)
+
+**Data Preparation:** Recall that centering variables can improve the interpretation of the lower-order effects in a moderation model. You are to add **two variables to the lawyer data frame. Name them sexism_c and approp_c** and make these the mean-centered versions of **sexism** and **approp**, respectively**.** Although PROCESS can do this automatically with center = 1, I want you to have more practice manipulating data frames in R.
+
+```{r}
+lawyer$sexism_c <- lawyer$sexism - mean(lawyer$sexism)
+lawyer$approp_c <- lawyer$approp - mean(lawyer$approp)
+```
+
+### Question 3 (8pts total)
+
+Write out the equation for a model where sexism_c is the only moderator and protest and eval are the predictor and outcome, respectively. Then for a model where only sexism (uncentered) is the moderator.
+
+#### Q3.a (1pt total)
+
+**Write out the model equations (can be for both models, don't need the error term).**
+
+$Y = b_0 + b_1*protest + b_2*sexism_c + b_3*protest*sexism_c$
+
+$Y = b_0 + b_1*protest + b_2*sexism + b_3*protest*sexism$
+
+#### Q3.b (1pt total)
+
+**Fit the models (can be both in same chunk):** Fit the moderation model with sexism centered and without it centered. What changes in the interpretation of these models? (Interpret **all coefficients**, intercepts included.)
+
+```{r}
+# manually 
+cent_model <- lm(eval ~ protest*sexism_c, data = lawyer); summary(cent_model)
+  
+uncent_model <- lm(eval ~ protest*sexism, data = lawyer); summary(uncent_model)
+
+# in process 
+# uncentered
+process(data = lawyer, x = "protest", w = "sexism_c", y = "eval", model = 1)
+
+# centered
+process(data = lawyer, x = "protest", w = "sexism", y = "eval", model = 1)
+```
+
+The only thing that changes in these models is $b_0$ and $b_1$, which are interpreted as the expected value of $Y$ when $X = W = 0$ and the expected change in $Y$ with a one-unit increase in $X$ when $W$ (sexism) is 0. This is because the meaning of 0 for $W$ changes when we center. Instead of being 0 on the raw scale, which is sometimes meaningless or impossible, mean-centering makes the $W = 0$ mean when sexism is *at the sample mean*. The interpretations of each coefficient are below:
+
+**Centered Model**
+
+$b_0$**:** People in the no protest condition ($X$ = 0) at the sample mean of perceived sexism are expected to like the lawyer at a score of 5.268 units.
+
+$b_1$**:** Those in protest condition are expected to like the lawyer 0.52 units *more* than the no protest condition when perceived sexism is at the sample mean.
+
+**Uncentered Model**
+
+$b_0$**:** People in the no protest condition ($X$ = 0) with a perceived sexism of 0 (an impossible value) are expected to like the lawyer at a score of 7.706 units.
+
+$b_1$: Those in protest condition are expected to like the lawyer 4.13 units *less* than the no protest condition when perceived sexism is 0 (which is an impossible value on the measurement scale).
+
+**Both Models**
+
+$b_2$**:** Liking is expected to decrease by 0.473 units when perceived pervasiveness of sexism increases by one-unit and someone is told the lawyer did not protest (because $X$ = 0 = no protest condition).
+
+$b_3$**:** The protest condition is expected to be an additional 0.90 units *higher* in liking when perceived sexism increases by one-unit.
+
+#### Q3.c (6pts total)
+
+**Model results**
+
+**Uncentered model:** What is/is not significant, interpret effects.
+
+All effects are significant.
+
+$b_0 = 7.71, t = 7.03, p < .001.$
+
+$b_1 = -4.13, t = -2.64, p = .01.$
+
+$b_2 = -0.47, t = -2.21, p = .03.$
+
+$b_3 = 0.90, t = 3.01, p = .004.$
+
+**Centered model:** What is/is not significant, interpret effects.
+
+$b_0 = 5.27, t = 32.27, p < .001.$
+
+$b_1 = 0.52, t = 2.29, p = .02.$
+
+$b_2 = -0.47, t = -2.21, p = .03.$
+
+$b_3 = 0.90, t = 3.01, p = .004.$
+
+### Question 4 (8pts total)
+
+**Probing the interaction - centered model only:** We're going to probe the interaction only in the centered model using the Johnson-Neyman procedure and the simple slopes procedure. You may use PROCESS or do this manually.
+
+#### Q4.a (4pts total)
+
+**Simple Slopes (at the mean +/- one SD)**
+
+```{r}
+# do significance tests at the mean +/- one standard deviation
+# manually 
+
+lawyer$sexism_l = lawyer$sexism - (mean(lawyer$sexism) - sd(lawyer$sexism))
+lawyer$sexism_h <- lawyer$sexism - (mean(lawyer$sexism) + sd(lawyer$sexism))
+
+low_mod <- lm(eval ~ protest*sexism_l, data = lawyer); summary(low_mod)
+avg_mod <- lm(eval ~ protest*sexism_c, data = lawyer); summary(avg_mod)
+high_mod <- lm(eval ~ protest*sexism_h, data = lawyer); summary(high_mod)
+
+# in PROCESS
+process(data = lawyer, x = "protest", w = "sexism_c", y = "eval", model = 1, moments = 1, plot =1)
+
+# create a plot with the simple slopes
+### visualizations and probing - simple slopes mean +/- 1 SD
+x_values <- rep(c(0,1),3) # predictor values for probing via simple slopes
+y_values <- c(5.63,5.4615,5.2682,5.7897,4.9065,6.1179) # outcome values for probing via simple slopes
+simp_slope_perform <- data.frame(x = x_values, w = factor(c("Low (-1SD)","Low (-1SD)","Medium (Mean)","Medium (Mean)","High (+1SD)","High (+1SD)"), levels = c("Low (-1SD)","Medium (Mean)","High (+1SD)"), ordered=TRUE), y = y_values)
+
+### old simple slopes continuous moderator ggplot
+ggplot(data=simp_slope_perform) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=w)) + # create lines
+  geom_point(aes(x=x, y =y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black")) + # end theme code
+  guides(color=guide_legend(title="Sexism")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  scale_x_continuous(breaks = c(0,1), labels = c("No Protest","Protest")) + # change values on x-axis
+  labs(x="Condition",y="Evaluation") # relabel axes
+```
+
+What can we say as a result of this investigation? Interpret the interaction.
+
+At high values of perceived sexism (-1 SD), the protest condition likes the lawyer 1.21 units *more* than the no protest condition. This effect is significant ($b_L = 1.21, t = 3.74, p < .001$).
+
+At average values of perceived sexism (mean), the protest condition likes the lawyer 0.52 units *more* than the no protest condition. This effect is significant ($b_M = 0.52, t = 2.29, p = .02$).
+
+At low values of perceived sexism (+1 SD), the protest condition likes the lawyer 0.17 units *less* than the no protest condition. This effect is significant ($b_H = -0.17, t = -0.52, p = .60$).
+
+#### Q4.b (4pts total)
+
+**Johnson-Neyman (no plot)**
+
+```{r}
+# do the JN technique
+
+# only doing this in PROCESS
+process(data = lawyer, x = "protest", w = "sexism_c", y = "eval", jn =1, model = 1)
+
+# do not create a plot for this 
+```
+
+What can we interpret as a result of this investigation? Write out the region of significance and what this means for the interaction.
+
+From the JN, we can see that the effect of protesting on being liked is significant starting at perceived mean centered sexism values of -0.073 (i.e., when they are just below average in how pervasive they believe sexism to be in society). After this value the effect of liking becomes significantly more positive. This means that people like the lawyer more when she protests the more of a problem they believe sexism to be. (This could potentially be a problematic line of thinking if it leads to them disliking her if they think it's a big issue and she doesn't protest.)
+
+### Question 5 (8pts total)
+
+**Multiple additive moderation:** Let's try to expand the model. Let's write out the equation and fit a model where sexism_c and approp_c are **additive centered moderators.**
+
+#### Q5.a (1pt total)
+
+$Y = b_0 + b_1*protest + b_2 * sexism_c + b_3*protest*sexism_c + b_4 * approp_c + b_5*protest*approp_c$
+
+#### Q5.b (1pt total)
+
+**Fit the model.**
+
+```{r}
+summary(lm(eval~protest*sexism_c + protest*approp_c, data = lawyer))
+```
+
+#### **Q5.c (6pts total)**
+
+**Model results (write-up)**: What is/is not significant? Is this model worth running (why or why not)?
+
+**Note:** There is no need to probe/visualize this model. (It's beyond the scope of this assignment.)
+
+Here, the intercept, conditional effect of centered appropriateness, and interaction between protest and sexism_c are all significant.
+
+It is unclear whether this model is worth running without knowing more about substantive theory. My suspicion is that it is not worth running, solely because I don't expect perceived response appropriateness to moderate this relationship. I wouldn't be surprised to find that how pervasive one believes sexism to be causes their perception of the response appropriateness, which would give us a model where sexism_c is a moderator and approp_c is a mediator.
+
+### Bonus (1pt total)
+
+**Comprehensive visualization of simple moderation model:** Using the ggplot2 code template below (and examples from past lectures), create a comprehensive visualization combining the simple slopes and Johnson-Neyman procedures. Save the image and upload it to the assignment submission portal on the bonus submission question. You should only need to plug in values as appropriate here. Don't forget to change labels as appropriate.
+
+```{r}
+## new graph, combination of scatterplot, simple slopes, and J-N
+simpmod <- lm(eval~protest*sexism_c, data = lawyer)
+b0 <- coef(simpmod)[1];b1 <- coef(simpmod)[2];b2 <- coef(simpmod)[3];b3 <- coef(simpmod)[4]
+sintlow <- b0 + b2*(mean(lawyer$sexism_c)-sd(lawyer$sexism_c));sslolow <- b1 + b3*(mean(lawyer$sexism_c)-sd(lawyer$sexism_c))
+sintmed <- b0 + b2*(mean(lawyer$sexism_c));sslomed <- b1 + b3*(mean(lawyer$sexism_c))
+sinthigh <- b0 + b2*(mean(lawyer$sexism_c)+sd(lawyer$sexism_c));sslohigh <- b1 + b3*(mean(lawyer$sexism_c)+sd(lawyer$sexism_c))
+sintsig1 <- b0 + b2*(-0.0729);sslosig1 <- b1 + b3*(-0.0729)
+lawyer$modinROS <- as.numeric(lawyer$sexism_c >= -0.0729)
+lawyer$sexism_c = lawyer$sexism-mean(lawyer$sexism)
+# new visual with all the bells and whistles
+ggplot() + 
+  #geom_boxplot(data=test, aes(y= eval,x= protest,color=as.factor(modinROS))) +
+  geom_point(data=lawyer, aes(y = eval, x = protest, color = as.factor(modinROS)), position=position_jitterdodge(dodge=0.6)) + # add points and color by factor
+  geom_rug(data=lawyer, aes(y= eval,x= protest),outside=TRUE,sides="tr", position="jitter") + # allows for rug plot
+  coord_cartesian(clip = "off") + # allows for rug plot
+  geom_abline(slope=sslolow,intercept=sintlow,color="#031D38", size = 1) + # slope at low levels
+  geom_abline(slope=sslomed,intercept=sintmed,color="#346E9D", size = 1) + # slope at medium levels
+  geom_abline(slope=sslohigh,intercept=sinthigh,color="#55AEF3", size = 1) + # slope at high levels
+  geom_abline(slope=sslosig1,intercept=sintsig1,color="black",linetype="dotted", size =1) + # add region 1
+  theme_bw() +
+  scale_color_manual(name="Sexism (Centered) (W)", labels = c("Not in ROS","ROS"), values = c("red2","green4")) + 
+  #scale_x_continuous(expand = expansion(mult=.005)) +
+  #scale_y_continuous(expand = expansion(mult=.005)) + 
+  theme(panel.grid.major = element_blank(), # remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(),
+        legend.background = element_rect(color="black")) + # add axis lines, end theme adjustments
+    scale_x_continuous(breaks = c(0,1), labels = c("No Protest","Protest")) + # change values on x-axis
+  labs(x="Condition",y="Evaluation") # relabel axes
+```
+
+## The end
+
+Render the document and upload the .qmd and .docx files to the ELMS portal.
+
+Thank you! :)
