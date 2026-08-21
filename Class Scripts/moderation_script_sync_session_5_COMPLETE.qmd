@@ -1,0 +1,399 @@
+---
+title: "Synchronous Session 5"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Multiple Moderation Analysis
+
+As we learned last week, moderation analysis allows us to uncover the "when" and "for whom" qualifying a causal effect (i.e., when a relationship is different in size or sign based on another variable's value, such as an effect differing between men, women, and another gender). Simple moderation analysis was merely a multiple regression model with two variables and the product between them as predictors.
+
+$$Y=\beta_0+\beta_1X+\beta_2W+\beta_3XW$$ where $\beta_0$ is the estimated value of $Y$ when $X$ and $W$ are 0, $\beta_1$ is a *conditional effect* that represents the estimated change in $Y$ with a one-unit increase in $X$ when $W$ is 0, $\beta_2$ is a *conditional effect* that represents the estimated change in $Y$ with a one-unit increase in $W$ when $X$ is 0, and $\beta_3$ represents the change in the effect of $X$ on $Y$ when $W$ increases by one unit and vice versa. In other words, it is the rate in the change of the slopes. We also learned that inference for $\beta_3$ (the weight for the interaction term) is just the start to understanding a moderation model. We also must *probe* the interaction with either the simple slopes procedure (spotlight analysis, best for categorical moderators) or the Johnson-Neyman technique (floodlight analysis, only for continuous moderators) to understand how the effect is being moderated (e.g., for which group(s) is the effect significant or not or positive or negative).
+
+## Mean-Centering Variables
+
+Like we talked about last week, *conditional effects* in moderation models are the effects of a variable conditioned on the other variable being 0. In psychology (and many other sciences), there is often times not a meaningful zero point. Regardless, there is always a meaningful value that we could choose---the sample mean---that is easy to make the new "zero" through a process called mean centering. When you mean center, you simply subtract the value of the mean from EVERY observed value. Doing this makes the new mean numerically zero. Let's look at a simple example:
+
+```{r}
+vec = c(1:9)
+mean(vec)
+
+newvec = vec - mean(vec)
+mean(newvec)
+```
+
+Mean centering improves the interpretation of the lower-order terms in our model, but there is a major misconception that it does anything about the interpretation for or test of the interaction. Due to a series of complicated math reasons, linear transformations like mean centering have no impact on the test of our interaction term. Let's take a look at another example:
+
+```{r}
+# create dummy data
+stud_dat = data.frame(study_hrs = round(runif(100, 80, 100)), interest = runif(100, 1, 5), exam_score = runif(100, 50, 100))
+
+# create mean centered variables
+stud_dat$study_C = stud_dat$study_hrs - mean(stud_dat$study_hrs)
+stud_dat$interest_C = stud_dat$interest - mean(stud_dat$interest)
+
+# verify the process worked
+mean(stud_dat$study_hrs);mean(stud_dat$study_C)
+mean(stud_dat$interest);mean(stud_dat$interest_C)
+
+# now, fir the model with the centered and uncentered variables
+# uncentered model
+summary(lm(exam_score ~ study_hrs*interest, data = stud_dat))
+# centered model
+summary(lm(exam_score ~ study_C*interest_C, data = stud_dat))
+```
+
+As we can see, the estimates, standard errors, test statistics, and *p*-values changed for the effects of study hours and interest, but **remained identical for the test of the interaction**. The ability to interpret our lower-order estimates helps us tell a more interesting story (as it is the effect of X/W when the other is at the sample average as opposed to 0), but it is not required for the test of what we are ultimately interested in...the interaction term. I recommend mean centering, but the choice is yours and ultimately irrelevant in most cases.
+
+## Additive Multiple Moderation
+
+Like with mediation, it is easy to add multiple moderators to the same model. Let's say we have our focal predictor $X$, and two additional variables in $W$ and $Z$. A multiple regression model at the sample level with no moderation present as we well know would look like this:
+
+$$Y = b_0 + bX+b_2W+b_3Z$$and the weights for $X$, $W$, and $Z$ represent partial effects. That is, unconditional effects of our variables where the others are held constant. However, if we feel like $W$ and $Z$ moderate the relationship between $X$ and $Y$ and are *correlated* with each other, then we can add them as separate moderators in the model like so:
+
+$$Y=b_0+b_1X+b_2W+b_3Z+b_4XW+b_5XZ$$In such a model, $b_0$ is the intercept term where it is the estimated value of $Y$ when $X$, $W$, and $Z$ are all 0, $b_1$ represents the change in $Y$ with a one-unit increase in $X$ and $W$ and $Z$ are 0 (a *conditional effect*), $b_2$ represents the change in $Y$ with a one-unit increase in $W$ when $X$ is 0 and $Z$ is constant (a *conditional effect*), $b_3$ represents the change in $Y$ with a one unit increase in $Z$ when $X$ ix 0 $W$ is constant (a *conditional effect*), $b_4$ represents an *interaction effect---*the change in the conditional effect of $X$ on $Y$ when $W$ increases by one unit and $Z$ is constant, and $b_5$ represents an *interaction effect---*the change in the conditional effect of $X$ on $Y$ when $Z$ increases by one-unit and $W$ is held constant. **This is model 2 in PROCESS.**
+
+To perhaps make this more clear, this model has $X$ as a function of both $W$ and $Z$. We can decompose the effect of $X$ in the equation above:
+
+$$
+\theta_X = b_1+b_4W+b_5Z
+$$
+
+which is an additive linear function.
+
+## Multiplicative Multiple Moderation
+
+The additive moderation model above is more flexible than a simple moderation or a multiple regression, but it is only controlling for the correlation between the moderators (i.e., assumes they moderate without influencing each other). What if $W$'s moderation of $X$'s effect was itself moderated by $Z$? For example, suppose $X$ is a pro-Earth messaging campaign, $W$ is climate anxiety, $Z$ is education, $Y$ is pro-environmental behavior. The additive model would allow the effects of the campaign on behavior to vary based on how prone to climate anxiety one is regardless of their education level and vary based on their education level regardless of their climate anxiety. But what if the effects of the messaging campaign varied on climate anxiety, and became significantly more effective the more educated one was? Such a model is not uncommon, and it is both possible and easy to estimate these effects. This multiplicative moderation model---also called moderated moderation---can be represented at the sample level by the following equation:
+
+$$
+Y=b_0 +b_1X+b_2W+b_3Z+b_4XW+b_5XZ+b_6WZ+b_7XWZ
+$$
+
+where $b_0$ is an intercept that represents the estimated value of $Y$ when $X$, $W$, and $Z$ are 0, $b_1$ represents the *conditional effect* of $X$ on $Y$ when $W$ and $Z$ are 0, $b_2$ represents the *conditional effect* of $W$ on $Y$ when $X$ and $Z$ are 0, $b_3$ represents the *conditional effect* of $Z$ on $Y$ when $X$ and $W$ are 0, $b_4$ represents the *conditional interaction* between $X$ and $W$ when $Z$ is 0, $b_5$ represents the *conditional interaction* between $X$ and $Z$ when $W$ is 0, $b_6$ represents the *conditional interaction* between $W$ and $Z$ when $X$ is 0, and $b_7$ represents the *three-way* interaction between $X$, $W$, and $Z$ (the rate that the interaction $XW$ changes as $Z$ increases by one unit). Here, the effect of our focal predictor $X$ is an even more extensive function:
+
+$$\theta_X=b_1+b_4X+b_5W+b_7WZ$$which shows $X$'s effect as both a function of (or conditional on) $W$, $Z$, and their product term. Remember, however, that all of this is symmetrical (meaning that $W$'s effect is a function of $X$, $Z$, and their product and $Z$'s effect is a function of $X$, $W$, and their product but we ignore these interpretations in moderation because we assume roles of the variables).
+
+It should be noted that you must include ALL of the terms in the moderated moderation model regardless of their significance. Failing to do so will not correctly test the three-way interaction between $X$, $W$, and $Z$. **This is model 3 in PROCESS.**
+
+## Data Example
+
+Our data today come from a study on 262 small business owners in Richmond, Virginia to identify factors that increase or decrease the risk of intent to withdrawal from business ownership (Cole et al., 2008). These data are the original study. Participants were measured on a variety of constructs including:
+
+-   **age:** The age of the business owner in years. (Range: 23-71)
+
+-   **affect:** Self-reported depression levels, higher scores = more negative affect. (Range: 1-5)
+
+-   **withdraw:** Intentions to withdraw from entrepreneurship, higher scores = more intent. (Range: 1-7)
+
+-   **tenure:** Years in business. (Range: 0-33)
+
+-   **sex:** Self-reported sex; only male (1) and female (0) observed. (61.83% male)
+
+### Load Required Packages
+
+You should load the **jtools** and **ggplot2** packages. Be sure to also load PROCESS.
+
+```{r}
+# load required packages
+library(jtools)
+library(ggplot2)
+# remember to load PROCESS and route it to the correct location
+source("~/PSYC489K-SU26/process_v5.R")
+```
+
+### Read in the Data
+
+```{r}
+# read data into data frame 
+estress <- read.csv("~/PSYC489K-SU26/Datasets/estress_ic5.csv")  
+
+# now summarize the data 
+summary(estress)
+```
+
+### Model Prep
+
+We will be examining two different multiple moderation models of the relationship between the focal predictor ($X$), **affect**, and the outcome ($Y$), **withdraw**. More precisely, we will examine whether **tenure,** $W$, and **age**, $Z$, moderate this relationship additively or multiplicatively. Perhaps negative affect can impact withdraw intentions, but especially so the fewer years you've been in business and more so the older you are.
+
+## Fitting the Additive Model
+
+**Equation**
+
+First, write out the equation for an additive multiple moderation model:
+
+$$
+Y = b_0 +b_1X+b_2W+b_3Z+b_4XW+b_5XZ
+$$
+
+Now, fit the model to the data:
+
+```{r}
+add_2_mod = lm(withdraw ~ affect*tenure + affect*age, data = estress)
+summary(add_2_mod)
+```
+
+**Which interaction(s), if any, is/are significant? What can we say about this relationship? Do you think this is a reasonable model? Why or why not?**
+
+$b_0$: Withdraw intentions were expected to be at 1.012 when affect, tenure, and age were all 0.
+
+$b_1$: For each unit increase in negative affect, withdraw intentions were expected to increase by 0.947 units when tenure and age were 0.
+
+$b_2$: For each additional year in business, withdraw intentions decreased by 0.052 when affect and age were 0.
+
+$b_3$: For each additional year alive, withdraw intentions increased by 0.012 when negative affect and tenure were 0.
+
+$b_4$: The effect of negative affect on withdraw intentions increased by 0.035 units for each unit increase in tenure controlling for age.
+
+$b_5$: The effect of negative affect on withdraw intentions decreased by 0.010 units for each unit increase in age holding tenure constant.
+
+The interaction between affect and tenure was significant. However, we can't say more without probing the interaction.
+
+### Probing the Additive Model
+
+Now that we have some evidence of interaction, let's probe the significant interaction effect using the techniques we've learned to this point. As always, you can do this manually or (much easier) using PROCESS.
+
+#### Spotlight Analysis (Additive)
+
+Since both moderators are continuous, we would have to select values for each moderator. For the sake of simplicity, we will choose the mean +/- one standard deviation for each.
+
+**Note:** This will produce an interesting artifact for these data, and is part of the reason why Hayes recommends percentiles rather than standard deviations.
+
+```{r}
+## doing it manually
+# obtain values of X at mean +/- one SD
+range(estress$affect)
+xlow <- min(estress$affect) # use the minimum since one SD below is outside data
+xmean <- mean(estress$affect)
+xhigh <- mean(estress$affect)+sd(estress$affect)
+
+# obtain values of W at mean +/- one SD
+range(estress$tenure)
+wlow <- min(estress$tenure) # use the minimum since one SD below is outside data
+wmean <- mean(estress$tenure)
+whigh <- mean(estress$tenure)+sd(estress$tenure)
+
+# obtain values of Z at mean +/- one SD
+zlow <- mean(estress$age)-sd(estress$age)
+zmean <- mean(estress$age)
+zhigh <- mean(estress$age)+sd(estress$age)
+
+# assemble into data frame
+temp <- data.frame(affect = rep(c(xlow, xmean, xhigh),9), tenure = c(rep(wlow, 9),rep(wmean,9),rep(whigh,9)), age = rep(c(rep(zlow,3),rep(zmean,3),rep(zhigh,3)),3))
+
+# predict values of Y
+ypred <- predict(add_2_mod, temp)
+
+# assemble into final data frame for plotting
+probe_add_dat <- data.frame(x=temp$affect, z = rep(c(rep("Low",3),rep("Average", 3), rep("High", 3)),3), y = ypred, w = c(rep("Low", 9),rep("Average",9),rep("High",9)))
+
+# change moderator values to factors
+probe_add_dat$w = factor(probe_add_dat$w, levels = c("Low", "Average","High"))
+probe_add_dat$z = factor(probe_add_dat$z, levels = c("Low", "Average","High"))
+
+# create plot
+ggplot(data=probe_add_dat) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=z)) + # create lines
+  facet_grid(~w) + 
+ # geom_point(aes(x=x, y=y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black"),
+        plot.title = element_text(hjust = 0.5)) + # end theme code
+  guides(color=guide_legend(title="Tenure in Years (W)")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  labs(x="Negative Affect",y="Withdraw Intentions", title = "Age (Z)") # relabel axes
+```
+
+To conduct the pick-a-point approach in PROCESS mirror what we did above, we would use the appropriate model number (2) and the moments=1 argument. (Also add plot = 1 to generate data for the plot.)
+
+```{r}
+# this is process model 2, add moments = 1 for mean +/- one SD, plot = 1 for plot data
+process(data = estress, x = "affect", w = "tenure", z = "age", y = "withdraw", model = 2, moments = 1, plot = 1)
+
+# enter the plot data into a data frame
+process_add_dat = data.frame(x = rep(c(1, 1.5981, 2.3218),9), w = c(rep("Low",9),rep("Average",9),rep("High",9)), z = rep(c(rep("Low",3),rep("Average", 3), rep("High", 3)),3), y = c(1.9878,2.3593,2.8089,1.9969,2.3082,2.6848,2.0060,2.2570,2.5606,1.8872,2.3818,2.9802,1.8963,2.3306,2.8561,1.9054,2.2794,2.7319,1.7755,2.4067,3.1704,1.7846,2.3555,3.0463,1.7937,2.3043,2.9222))
+
+# change moderator values to factors
+process_add_dat$w = factor(process_add_dat$w, levels = c("Low", "Average","High"))
+process_add_dat$z = factor(process_add_dat$z, levels = c("Low", "Average","High"))
+
+# create plot
+ggplot(data=process_add_dat) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=z)) + # create lines
+  facet_grid(~w) + 
+ # geom_point(aes(x=x, y=y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black"),
+        plot.title = element_text(hjust = 0.5)) + # end theme code
+  guides(color=guide_legend(title="Tenure in Years (W)")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  labs(x="Negative Affect",y="Withdraw Intentions", title = "Age (Z)") # relabel axes
+```
+
+First, note that we had to select the minimum instead of one standard deviation below the mean for two of our variables due to the high variance in the observed variables. (One standard deviation below was outside the range of the data!) Based on this analysis, it appears that for all age groups, those lower in tenure were significantly more impacted by negative affect (and this effect decreased as tenure increased). As age increased, the effect of negative affect dramatically increased. Age seems to have an accelerating effect whereas tenure has a buffering effect. Negative affect significantly increased withdraw intentions at all values of both moderators.
+
+#### Floodlight Analysis (Additive)
+
+There is no nice way to do the Johnson-Neyman for an additive moderation model. PROCESS will ignore any calls to jn=1. For now, we will just focus on spotlight analysis in such models.
+
+## Fitting the Multiplicative Model
+
+The previous exercise assumed that tenure and age did not interact with each other. However, it is not unreasonable to assume that the older one is, the lesser the moderating effects of tenure are (and vice versa). We can test this by including a three-way interaction between $X$, $W$, and $Z$ in the model.
+
+**Equation**
+
+Write out the equation for the moderated moderatoin model:
+
+$$
+Y = b_0 + b_1X + b_2W + b_3Z + b_4XW + b_5XZ + b_6WZ + b_7XWZ
+$$
+
+Now, fit the model to the data:
+
+```{r}
+# fit the model
+mod3way = lm(withdraw ~ affect*tenure*age, data = estress)
+# produce the results
+summary(mod3way)
+```
+
+**Which interaction(s), if any, is/are significant? What can we say about this relationship? Do you think this is a reasonable model? Why or why not?**
+
+$b_0$: When affect, tenure, and age were 0, withdraw intentions were expected to be 2.388 units.
+
+$b_1$: When negative affect increased by one unit, withdraw intentions decreased by 0.174 units when tenure and age were both 0.
+
+$b_2$: Withdraw intentions were expected to decrease by 0.420 units for each extra year in business when negative affect and age were 0.
+
+$b_3$: Withdraw intentions were expected to decrease by 0.020 units each additional year someone lives when negative affect and years in business (tenure) were 0.
+
+$b_4$: For each additional year in business, the effect of affect increased withdraw intentions by 0.337 units when age was 0.
+
+$b_5$: For each additional year alive, the effect of affect increased by 0.015 units when tenure was 0.
+
+$b_6$: The effect of tenure on withdraw intentions increased by 0.007 units for each additional year someone lived when negative affect was 0.
+
+$b_7$: The three-way interaction between affect, tenure, and age was statistically significant ($b_7=-0.006, t = -2.855, p = .005$). The interaction between negative affect and tenure decreased by 0.006 units for each one unit increase in age.
+
+From this model, it appears that affect, age, and tenure all interact. It first appears like age and years in business both buffer against the effects of negative affect, but we should visualize this relationship before making further claims.
+
+### Probing Moderated Moderation
+
+Now that we have some evidence of interaction, let's probe the significant interaction effect using the techniques we've learned to this point. As always, you can do this manually or (much easier) using PROCESS.
+
+#### Spotlight Analysis (Multiplicative)
+
+To probe the three-way interaction, since both moderators are continuous, we can test the interaction between the focal predictor and $W$ at specific values of $Z$. We can choose the mean +/- one standard deviation for each, and determine whether the conditional effect of $X$ on $Y$ for low, medium, and high values of $W$ is significant at low, medium, and high values of $Z$. More than ever, our resulting interpretation is going to be contingent on the values we choose here. We are using convention in this class, but it is entirely reasonable you may choose different values and you should be ready to justify your choice one way or another.
+
+```{r}
+## doing it manually
+# obtain values of X at mean +/- one SD
+range(estress$affect)
+xlow <- min(estress$affect) # use the minimum since one SD below is outside data
+xmean <- mean(estress$affect)
+xhigh <- mean(estress$affect)+sd(estress$affect)
+
+# obtain values of W at mean +/- one SD
+range(estress$tenure)
+wlow <- min(estress$tenure) # use the minimum since one SD below is outside data
+wmean <- mean(estress$tenure)
+whigh <- mean(estress$tenure)+sd(estress$tenure)
+
+# obtain values of Z at mean +/- one SD
+zlow <- mean(estress$age)-sd(estress$age)
+zmean <- mean(estress$age)
+zhigh <- mean(estress$age)+sd(estress$age)
+
+# assemble into data frame
+temp <- data.frame(affect = rep(c(xlow, xmean, xhigh),9), tenure = c(rep(wlow, 9),rep(wmean,9),rep(whigh,9)), age = rep(c(rep(zlow,3),rep(zmean,3),rep(zhigh,3)),3))
+
+# predict values of Y
+ypred <- predict(mod3way, temp)
+
+# assemble into final data frame for plotting
+probe_dat <- data.frame(x=temp$affect, z = rep(c(rep("Low",3),rep("Average", 3), rep("High", 3)),3), y = ypred, w = c(rep("Low", 9),rep("Average",9),rep("High",9)))
+
+# change moderator values to factors
+probe_dat$w = factor(probe_dat$w, levels = c("Low", "Average","High"))
+probe_dat$z = factor(probe_dat$z, levels = c("Low", "Average","High"))
+
+# create plot
+ggplot(data=probe_dat) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=z)) + # create lines
+  facet_grid(~w) + 
+ # geom_point(aes(x=x, y=y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black"),
+        plot.title = element_text(hjust = 0.5)) + # end theme code
+  guides(color=guide_legend(title="Tenure in Years (W)")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  labs(x="Negative Affect",y="Withdraw Intentions", title = "Age (Z)") # relabel axes
+```
+
+To conduct the pick-a-point approach in PROCESS mirror what we did above, we would use the appropriate model number (3) and the moments=1 argument. (Also add plot = 1 to generate data for the plot.)
+
+```{r}
+# this is process model 3, add moments = 1 for mean +/- one SD, plot = 1 for plot data
+process(data = estress, x = "affect", y = "withdraw", w = "tenure", z = "age", model = 3, moments = 1, plot = 1)
+
+# enter the plot data into a data frame
+process_data = data.frame(x = rep(c(1, 1.5981, 2.3218),9), w = c(rep("Low",9),rep("Average",9),rep("High",9)), z = rep(c(rep("Low",3),rep("Average", 3), rep("High", 3)),3), y = c(2.0535, 2.2490, 2.4854, 2.0038, 2.2919, 2.6406, 1.9540, 2.3348, 2.7957, 1.8023, 2.5019, 3.3485, 1.8274, 2.4062, 3.1066, 1.8524, 2.3104, 2.8646, 1.5233, 2.7829, 4.3071, 1.6314, 2.5331, 3.6241, 1.7396, 2.2833, 2.9412))
+
+# change moderator values to factors
+process_data$w = factor(probe_dat$w, levels = c("Low", "Average","High"))
+process_data$z = factor(probe_dat$z, levels = c("Low", "Average","High"))
+
+# create plot
+ggplot(data=process_data) + # lets ggplot know the data frame we're working with
+  geom_line(aes(x=x,y=y,color=z)) + # create lines
+  facet_grid(~w) + 
+ # geom_point(aes(x=x, y=y, color=w)) + # add dots at end of lines
+  theme_bw() + # this makes it neat and tidy
+  theme(panel.grid.major = element_blank(), # start theme code, remove grid
+        panel.grid.minor = element_blank(), # remove grid
+        panel.background = element_rect(color="black"), # remove background
+        axis.title.x = element_text(hjust=.5), # center x axis title
+        axis.title.y = element_text(hjust=.5), # center y axis title
+        axis.line = element_line(), # add axis lines
+        legend.background = element_rect(color="black"),
+        plot.title = element_text(hjust = 0.5)) + # end theme code
+  guides(color=guide_legend(title="Tenure in Years (W)")) +
+  scale_color_manual(values=c("#F8766D","#00BA38","#619CFF")) +
+  labs(x="Negative Affect",y="Withdraw Intentions", title = "Age (Z)") # relabel axes
+```
+
+Based on this analysis, it appears that negative affect increases withdraw intentions, but differently depending on age and years in business. For younger persons, more years in business meant higher withdraw intentions with negative affect. (This may be because there was experience is lower for younger people anyway.) As age increases, negative affect increasingly impacts withdraw intentions, but significantly more so for persons who haven't been in business long. It seems like age can accelerate the effects of negative affect on withdraw intentions, but experience can buffer against those effects.
+
+#### Floodlight Analysis (Multiplicative)
+
+We can conduct the Johnson-Neyman technique with a caveat. All we would be doing is determining the region(s) of significance for the conditional $XW$ interaction across the range of the moderator, $Z$ (similar to how we determine the significance of the conditional effect of $X$ across the range of the moderator $W$ in simple moderation). For simplicity, we will do this using PROCESS.
+
+```{r}
+res = process(data = estress, x = "affect", y = "withdraw", w = "tenure", z = "age", model = 3, jn = 1, moments = 1, plot = 1)
+```
+
+From this analysis, it is evident that the conditional interaction between negative affect and tenure decreases as age increases. More specifically, the interaction between these two variables is significant at all ages until 52.2641 years old. After this age, tenure does not moderate the effect of negative affect.
+
+## Summary
+
+Overall, it is hard to stay in business when you have negative affect. Entrepreneurship requires many things going well (often times things not in your control) to succeed. Age and tenure are two things that occur naturally over time. Age is a risk factor for withdrawing from business. The older one gets, the more it appears they are likely to quit when times are tough. However, resilience (staying in business longer) can decrease the desire to withdraw.
+
+## End of script
