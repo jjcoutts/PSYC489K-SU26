@@ -1,0 +1,216 @@
+---
+title: "Synchronous Session 6"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Conditional Process Analysis
+
+To this point, we have learned about mediation and moderation as separate entities. Mediation is the *how* behind effects and moderation is the *when*. In reality, effects that are mediated (i.e., all effects) are probably conditional on another variable. For example, the effects of a drug intervention on drug use through social support are likely contingent in some way on whether the individual has a family history of drug abuse. Mediation can and should be combined in a single model, one that allows us to study *conditional indirect effects*. Such models have had many names over the years---mediated moderation, moderated mediation, and conditional process analysis (coined by Hayes, a familiar name!). To be the most general (and avoid some of the conditions that come with the terms above), we will either use the term conditional process analysis or---even more plainly---models with conditional indirect effects.
+
+Because indirect effects can be composed of any number of paths (in serial or parallel mediation analysis) and any or all paths can be moderated by the same or multiple variables, there are essentially an infinite number of possible conditional indirect effects. What we cover will only be the tip of the iceberg, but know the techniques we have learned and will learn generalize to more complicated models. The five most standard conditional indirect effects (CIEs) are below.
+
+## First-Statge CIEs
+
+The first CIE we will talk about is the *first-stage* CIE, where the $a$ path is moderated by a moderator, $W$. The diagram for a first-stage model (shown in the lecture) shows only two variables receiving arrows: $M$ and $Y$. Thus, we only have two regression equations. A first-stage model can be specified with the following equations:
+
+$$
+M = d_M + a_1X + a_2W + a_3XW
+$$
+
+$$
+Y = d_Y + bM + c'X
+$$
+
+where $d_M$ and $d_Y$ are intercepts, $a_1$ is the conditional effect of $X$ on $M$ when $W$ is 0, $a_2$ is the conditional effect of $W$ on $M$ when $X$ is 0, and $a_3$ represents the interaction of $X$ and $W$ on $M$. For simplicity and to avoid redundancy, I will avoid providing targeted interpretations of all the paths since these are just regression coefficients that mirror what we have covered this whole semester.
+
+### First-Stage Point Estimate and Testing
+
+The point estimate of a first-stage CIE (the indirect effect of $X$ on $Y$ through $M$ at specific levels of $W$) can be obtained by multiplying the effect of $X$ and the effect of $M$ together. Since $X$ is moderated, it's effect consists of multiple terms (recall from moderation, $\theta_X = a_1 + a_3W$. Together, the point estimate becomes:
+
+$$
+(a_1 + a_3W)b
+$$
+
+With this, you can plug in values of W to calculate the indirect effect at those values of the moderator. To determine whether these point estimates (simple indirect effects) are statistically significant or not, you can use the bootstrap or Monte Carlo confidence intervals. However, research suggests that the bootstrap is a superior technique.
+
+### Inference for CIEs (The ICIE)
+
+Like moderation with simple effects, the presence of simple indirect effects does not tell us whether an indirect effect is moderated overall. In moderation, we need to test the interaction term. Likewise, we need some kind of index that we can test to determine whether the *indirect effect* is moderated. Inference for conditional indirect effects is complex, but can be simplified with the framework I'm going to present.
+
+I call the index the **index of a conditional indirect effect** (ICIE), which is the highest order expression of an indirect effect. You may see this called the *index of moderated mediation* or *index of conditional moderated mediation* (or still, other names) depending on the model. I created this term to simplify the testing process and avoid confusing terminology. To create the ICIE, you just trace the specified indirect effect and if there is a higher-order term, replace the path with that term.
+
+For example, a first-stage indirect effect is a simple mediation model (which is typically $ab$, but since $a$ is moderated, we would use the higher-order term (one pertaining to the highest interaction) $a_3$ in its place. Thus, we would conduct an inferential test on $a_3b$ and, if it's significant, have evidence that the indirect effect is moderated. Like mediation, there is debate about the best inferential test for the ICIE. My work suggests the joint test and bootstrap confidence intervals are better than Monte Carlo intervals, and you should use the bootstrap for similar reasons as you do in mediation analysis.
+
+## Second-Statge CIEs
+
+A *second-stage CIE* is one where the *b* path, or second part, of the indirect effect is moderated. A second-stage model can be specified with the following equations:
+
+$$ M = d_M + aX $$
+
+$$ Y = d_Y + b_1M + b_2W + b_3MW + c'X $$
+
+### Second-Stage Point Estimate and Testing
+
+To obtain a point-estimate of a second-stage CIE, you calculate the product of the effect of $X$ (captured by $a$) and the effect of $M$ controlling for $X$, captured by ($b_1+b_3W$). Thus:
+
+$$
+a(b_1+b_3W)
+$$
+
+To determine whether the overall effect is moderated, you would test the ICIE. Since $a$ is not moderated and $b$ is, the ICIE (consisting of the highest order effect of both paths) is $ab_3$.
+
+## Dual-Stage CIEs
+
+A *dual-stage CIE*, where $a$ and $b$ are moderated by the same variable, $W$, can be specified with the following equations:
+
+$$
+M = d_M + a_1X + a_2W + a_3XW
+$$
+
+$$ Y = d_Y + b_1M + b_2W + b_3MW + c'X $$
+
+### Dual-Stage Point Estimate and Testing
+
+The point-estimate for a dual-stage CIE is the product of the effect of $X$ ($a_1+a_3W$) and the effect of $M$ controlling for $X$, ($b_1+b_3W$). Thus:
+
+$$ (a_1+a_3W)(b_1+b_3W) $$
+
+To determine whether the overall effect is moderated, since both paths are moderated, the ICIE consists of the product of both interaction terms, $a_3b_3$.
+
+## Split-Statge CIEs
+
+A *split-stage CIE* is very similar to a dual-stage CIE, except the paths are moderated by different variables $W$ and $Z$. A split-stage CIE is specified with the following equations:
+
+$$ M = d_M + a_1X + a_2W + a_3XW $$
+
+$$  Y = d_Y + b_1M + b_2Z + b_3MZ + c'X  $$
+
+### Split-Stage Point Estimate and Testing
+
+The point-estimate for a split-stage CIE is the product of the effect of $X$ ($a_1+a_3W$) and the effect of $M$ controlling for $X$, ($b_1+b_3Z$). Thus:
+
+$$ (a_1+a_3W)(b_1+b_3Z) $$
+
+To determine whether the overall effect is moderated, the ICIE is the same as the dual-stage model, $a_3b_3$.
+
+## IV-as-Moderator CIEs
+
+Sometimes $X$ can server as a moderator of its own indirect effect. An IV-as-moderator indirect effect can be specified by the following equations:
+
+$$ M = d_M + aX $$
+
+$$ Y = d_Y + b_1M + b_2MX + c'X $$
+
+### IV-as-Moderator Point Estimate and Testing
+
+A conceptual diagram for an IV-as-moderator CIE is below:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/ivasm.jpg)
+
+The point-estimate for an IV-as-moderator CIE is the product of the effect of $X$ ($a$) and the effect of $M$ controlling for and moderated by $X$, ($b_1+b_2X$). Thus:
+
+$$a(b_1+b_2X)$$
+
+and the ICIE is the highest-order effect for both paths, $ab_2$.
+
+To further complicate matters, the direct effect may or may not be moderated in any of the above examples. The choice of whether it is is not at all arbitrary and can impact the significance of the ICIE or point estimates of the CIE. As always, you need to carefully consider and justify each path, either with prior research (ideally) or sound rationale (at minimum). The steps we took to construct point estimates for the CIE and the ICIE generalize to more complicated models.
+
+## Data Example
+
+Our data today come from a study on 262 small business owners in Richmond, Virginia to identify factors that increase or decrease the risk of intent to withdrawal from business ownership (Cole et al., 2008). These data are the original study. Participants were measured on a variety of constructs including:
+
+-   **age:** The age of the business owner in years. (Range: 23-71)
+
+-   **affect:** Self-reported depression levels, higher scores = more depression. (Range: 1-5)
+
+-   **withdraw:** Intentions to withdraw from entrepreneurship, higher scores = more intent. (Range: 1-7)
+
+-   **tenure:** Years in business. (Range: 0-33)
+
+-   **sex:** Self-reported sex; only male (1) and female (0) observed. (61.83% male)
+
+### Load Required Packages
+
+You should load the **jtools** and **ggplot2** packages. Be sure to also load PROCESS.
+
+```{r}
+# load in required packages    
+
+# be sure to also load PROCESS so it can be used later in this script 
+
+```
+
+### Read in the Data
+
+```{r}
+# read data into data frame 
+
+# now summarize the data 
+
+```
+
+### Model Prep
+
+We will be examining two different multiple moderation models of the relationship between the focal predictor ($X$), **affect**, and the outcome ($Y$), **withdraw**. More precisely, we will examine whether **tenure,** $W$, and **age**, $Z$, moderate this relationship additively or multiplicatively. Perhaps depression can impact withdraw intentions, but especially so the fewer years you've been in business and more so the older you are.
+
+## Fitting the Second-Stage Model
+
+**Equation**
+
+First, write out the equation for an additive multiple moderation model:
+
+...
+
+Now, fit the model to the data:
+
+```{r}
+
+```
+
+**Which interaction(s), if any, is/are significant? What can we say about this relationship? Do you think this is a reasonable model? Why or why not?**
+
+$b_1$:
+
+$b_2$:
+
+$b_3$:
+
+$b_4$:
+
+$b_5$:
+
+Description...
+
+## Probing Conditional Indirect Effects
+
+Now that we have some evidence of interaction, let's probe the significant interaction effect using the techniques we've learned to this point. As always, you can do this manually or (much easier) using PROCESS.
+
+### Spotlight Analysis (Additive)
+
+Since both moderators are continuous, we would have to select values for each moderator. For the sake of simplicity, we will choose the mean +/- one standard deviation for each.
+
+**Note:** This will produce an interesting artifact for these data, and is part of the reason why Hayes recommends percentiles rather than standard deviations.
+
+```{r}
+
+```
+
+To conduct the pick-a-point approach in PROCESS mirror what we did above, we would use the appropriate model number (2) and the moments=1 argument. (Also add plot = 1 to generate data for the plot.)
+
+```{r}
+
+```
+
+Based on this analysis, it appears that...
+
+### The Approximate Johnson-Neyman
+
+There is no nice way to do the Johnson-Neyman for an additive moderation model. PROCESS will ignore any calls to jn=1. For now, we will just focus on spotlight analysis in such models.
+
+## Summary
+
+*Tie everything together. What did we learn?*
+
+## End ofcript
