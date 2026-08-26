@@ -1,0 +1,364 @@
+---
+title: "Synchronous Session 6"
+author: "PSYC489K"
+format: docx
+editor: visual
+---
+
+# Conditional Process Analysis
+
+To this point, we have learned about mediation and moderation as separate entities. Mediation is the *how* behind effects and moderation is the *when*. In reality, effects that are mediated (i.e., *all* effects) are almost certainly conditional on another variable. For example, the effects of a drug intervention ($X$) on drug use ($Y$) through social support ($M$) are likely contingent in some way on whether the individual has a family history of drug abuse ($W$).
+
+Mediation and moderation can and should be combined in a single model, one that allows us to study *conditional indirect effects*. Such models have had many names over the years---mediated moderation, moderated mediation, and conditional process analysis (coined by Hayes, a familiar name!). To be the most general and avoid some of the conditions that come with the terms above, we will either use the term conditional process analysis or---even more plainly---models with conditional indirect effects.
+
+Because indirect effects can be composed of any number of paths and any or all paths can be moderated by the same or multiple variables, there are essentially an infinite number of possible conditional indirect effects. What we cover will only be the tip of the iceberg, but know the techniques we have learned and will learn generalize to more complicated models. The five most standard conditional indirect effects (CIEs) are below.
+
+## First-Statge CIEs
+
+Here is a conceptual diagram for a first-stage CIE:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/first_stage.jpg){fig-align="center"}
+
+In a *first-stage* CIE, the $a$ path is moderated by a moderator, $W$. The diagram for a first-stage model shows only two variables receiving arrows: $M$ and $Y$. Thus, we only have two regression equations. A first-stage model can be specified with the following equations:
+
+$$M = d_M + a_1X + a_2W + a_3XW$$
+
+$$Y = d_Y + bM + c'X$$
+
+where $d_M$ and $d_Y$ are intercepts, $a_1$ is the conditional effect of $X$ on $M$ when $W$ is 0, $a_2$ is the conditional effect of $W$ on $M$ when $X$ is 0, and $a_3$ represents the interaction of $X$ and $W$ on $M$. For simplicity and to avoid redundancy, I will avoid providing interpretations of all the paths since these are just regression coefficients that mirror what we have covered this semester.
+
+### First-Stage Point Estimate and Testing
+
+The point estimate of a first-stage CIE (the indirect effect of $X$ on $Y$ through $M$ at specific levels of $W$) can be obtained by multiplying the effect of $X$ and the effect of $M$ together. Since $X$ is moderated, its effect consists of multiple terms (recall from moderation: $\theta_X = a_1 + a_3W$). Together, the point estimate becomes:
+
+$$(a_1 + a_3W)b$$
+
+With this, you can plug in values of $W$ to calculate the indirect effect at those values. To determine whether these point estimates (*simple indirect effec*ts) are statistically significant or not, you can use the bootstrap or Monte Carlo confidence intervals. However, research suggests that the bootstrap is a superior technique.
+
+### Inference for CIEs (The ICIE)
+
+Like moderation with simple effects, the presence of simple indirect effects does not tell us whether an indirect effect is moderated overall. In moderation, we need to test the interaction term. Likewise, we need some kind of index that we can test to determine whether the *indirect effect* is moderated. Inference for conditional indirect effects is complex, but can be simplified with the framework we're learning today.
+
+The index in question I call the index the **index of a conditional indirect effect** (ICIE), which is (roughly) the highest order expression of an indirect effect. You may see this called the *index of moderated mediation* or *index of moderated moderated mediation* (or still, other names depending on the model). The ICIE is a simpler, all-inclusive term that simplifies the terminology in the hypothesis-testing process. To create the ICIE, you just trace the specified indirect effect and if there is a higher-order term, replace the path with that term.
+
+For example, a first-stage indirect effect is a simple mediation model, which is typically $ab$. Since $a$ is moderated, we would use the higher-order term (the one pertaining to the highest interaction) $a_3$ in its place. Thus, we would conduct an inferential test on $a_3b$ and, if it's significant, have evidence that the indirect effect is moderated. Like mediation, there is debate about the best inferential test for the ICIE. My work suggests the joint test and bootstrap confidence intervals are better than Monte Carlo intervals, and you should use the bootstrap for similar reasons as you do in mediation analysis.
+
+## Second-Statge CIEs
+
+Here is a conceptual diagram for a second-stage CIE:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/second_stage.jpg){fig-align="center"}
+
+A *second-stage CIE* is one where the $b$ path is moderated. A second-stage model can be specified with the following equations:
+
+$$ M = d_M + aX $$
+
+$$ Y = d_Y + b_1M + b_2W + b_3MW + c'X $$
+
+### Second-Stage Point Estimate and Testing
+
+To obtain a point-estimate of a second-stage CIE, you calculate the product of the effect of $X$ (captured by $a$) and the effect of $M$ controlling for $X$, captured by ($b_1+b_3W$). Thus:
+
+$$a(b_1+b_3W)$$
+
+To determine whether the overall effect is moderated, you would test the ICIE. Since $a$ is not moderated and $b$ is, the ICIE consisting of the highest order effect of both paths is $ab_3$.
+
+## Dual-Stage CIEs
+
+Here is a conceptual diagram for a dual-stage CIE:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/dual_stage.jpg){fig-align="center"}
+
+A *dual-stage CIE*, where $a$ and $b$ are moderated by the same variable, $W$, can be specified with the following equations:
+
+$$M = d_M + a_1X + a_2W + a_3XW$$
+
+$$ Y = d_Y + b_1M + b_2W + b_3MW + c'X $$
+
+### Dual-Stage Point Estimate and Testing
+
+The point-estimate for a dual-stage CIE is the product of the effect of $X$ ($a_1+a_3W$) and the effect of $M$ controlling for $X$, ($b_1+b_3W$). Thus:
+
+$$ (a_1+a_3W)(b_1+b_3W) $$
+
+To determine whether the overall effect is moderated, since both paths are moderated, the ICIE consists of the product of both interaction terms: $a_3b_3$.
+
+## Split-Statge CIEs
+
+Here is a conceptual diagram for a split-stage CIE:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/split_stage.jpg){fig-align="center"}
+
+A *split-stage CIE* is very similar to a dual-stage CIE, except the paths are moderated by different variables, $W$ and $Z$. A split-stage CIE is specified with the following equations:
+
+$$ M = d_M + a_1X + a_2W + a_3XW $$
+
+$$  Y = d_Y + b_1M + b_2Z + b_3MZ + c'X  $$
+
+### Split-Stage Point Estimate and Testing
+
+The point-estimate for a split-stage CIE is the product of the effect of $X$ ($a_1+a_3W$) and the effect of $M$ controlling for $X$, ($b_1+b_3Z$). Thus:
+
+$$ (a_1+a_3W)(b_1+b_3Z) $$
+
+To determine whether the overall effect is moderated, the ICIE is the same as the dual-stage model: $a_3b_3$.
+
+## IV-as-Moderator CIEs
+
+Here is a conceptual diagram for an IV-as-moderator CIE:
+
+![](https://raw.githubusercontent.com/jjcoutts/StatsImages/main/ivasm.jpg){fig-align="center"}
+
+Sometimes $X$ can server as a moderator of its own indirect effect. An IV-as-moderator indirect effect can be specified by the following equations:
+
+$$ M = d_M + aX $$
+
+$$ Y = d_Y + b_1M + b_2MX + c'X $$
+
+### IV-as-Moderator Point Estimate and Testing
+
+The point-estimate for an IV-as-moderator CIE is the product of the effect of $X$ ($a$) and the effect of $M$ controlling for and moderated by $X$, ($b_1+b_2X$). Thus:
+
+$$a(b_1+b_2X)$$
+
+and the ICIE is the highest-order effect for both paths, $ab_2$.
+
+## Moderation of the Direct Effect
+
+To further complicate matters, the direct effect may or may not be moderated in any of the above examples. The choice of whether it is is [not]{.underline} arbitrary and can impact the significance of the ICIE or point estimates of the CIE. As always, you need to carefully consider and justify each path, either with prior research (ideally) or sound rationale (at minimum).
+
+Whether the direct effect is moderated or you have more complicated indirect effects like serial or parallel models, the steps we took to construct point estimates for the CIE and the ICIE easily generalize.
+
+## Data Example
+
+Our data today come from a study that examined whether personal narratives could impact one's identification with a theoretical immigrant based on their similarity, which would in turn improve their feelings toward the outgroup member. Data were collected from 443 participants and the data are the original from the study. The data we are going to use consist of:
+
+-   **similar\*:** Audience-immigrant similarity in terms of social identity/relation to Spain. (0 = low similarity, 1 = high). 50.34% were in the high similarity condition.
+
+-   **voice\*:** Whether the narrative was in third-person voice (0) or first-person voice (1). 49.44% were in the first-person condition.
+
+-   **ident:** Index of identification with the protagonist of the narrative, a fictitious Romanian immigrant to Spain named Alina. (Range 1-5)
+
+-   **feeling:** Overall feelings of support toward Romanian immigrants in Spain (ranging from cold to warm). (Range 0-100)
+
+\*Versions coded as −0.5, 0.5 exist as **similar2** and **voice2** for main effect interpretations.
+
+### Load Required Packages
+
+You should load the **jtools** and **ggplot2** packages. Be sure to also load PROCESS.
+
+```{r}
+# load in required packages   
+library(jtools)
+library(ggplot2)
+# be sure to also load PROCESS so it can be used later in this script 
+source("~/PSYC489K-SU26/process_v5.R")
+```
+
+### Read in the Data
+
+```{r}
+# read data into data frame 
+immigration = read.csv("~/PSYC489K-SU26/Datasets/immigration_ic6.csv")
+
+# now summarize the data 
+summary(immigration)
+```
+
+### Model Prep
+
+We will be examining a first-stage conditional process model with moderation of the direct effect. The authors hypothesized that the similarity of the immigrant, **similar**, ($X$) would increase one's identification with them, **ident**, $M$, which would in-turn increase one's feelings toward the immigrant, **feeling**, $Y$. Further, they hypothesized that the relationship between similarity and identification would be moderated by narrative voice, **voice**, $W$, where a first-person account would make the identification stronger than third-person voice. Finally, they hypothesized **voice** would moderate the direct effect between **similar** and **feeling**.
+
+## Fitting the First-Stage Model
+
+**Equation**
+
+First, write out the equations for the model.
+
+$$
+M = d_M + a_1X + a_2W + a_3XW
+$$
+
+$$
+Y = d_Y + b_1M + c'_1X + c'_2W + c'_3XW
+$$
+
+We are going to do the $a$ and $b$ paths all at once. Recall, the $a$ path is sometimes called the *action theory* because we are seeing if our intervention/manipulation actually changed the mediator. The $b$ path, is sometimes called the *conceptual theory* of an indirect effect since we are seeing if the change in $M$ now leads to change in $Y$. (i.e., Is the theory linking those two constructs sound.)
+
+**Note:** In our model, $a$ and $c'$ are both moderated, but the $b$ path is not. This means that we have interaction terms for $X$ and $W$ present in both models.
+
+Now, fit the model to the data (manually, or in PROCESS):
+
+```{r}
+### fit the model manually
+# a paths
+m_mod <- lm(ident~similar*voice, data = immigration)
+summary(m_mod)
+# b path
+y_mod <- lm(feeling ~ similar*voice + ident, data = immigration)
+summary(y_mod)
+
+# store a3 and b for later
+a3 = coef(m_mod)["similar:voice"]
+b = coef(y_mod)["ident"]
+a3*b
+# significant by joint test
+
+### bootstrapping manually
+B = 10000 # number of resamples
+ssICIE = rep(NA, B) # to store ICIE results
+bsa1 = ssICIE; bsa3 = ssICIE; bsb = ssICIE # for simple CIEs later
+set.seed(489) # make reproducible
+n = nrow(immigration)
+
+for(i in 1:B){
+  # create bootstrap data
+  b_dat = immigration[sample(1:n, n, replace = TRUE),]
+  
+  # bootstrap models for m and y
+  bsm_mod = lm(ident ~ similar*voice, data = b_dat)
+  bsy_mod = lm(feeling ~ similar*voice + ident , data = b_dat)
+  
+  # store bootstrap results for the necessary paths of the CIE - a1, a3, and b
+  bsa1[i] = coef(bsm_mod)["similar"]
+  bsa3[i] = coef(bsm_mod)["similar:voice"]
+  bsb[i] = coef(bsy_mod)["ident"]
+  # store the results of the ICIE a3b
+  ssICIE[i] = bsa3[i]*bsb[i]
+}
+# print the manual CIE
+quantile(ssICIE, c(.025,.975))
+
+# now in PROCESS - 10000 bootstrap samples, model 8 for moderation of the a path and direct effect, create plot data, remove progress for rendering
+process(x = "similar", m = "ident", y = "feeling", w = "voice", boot = 10000, model = 8, seed = 489, plot = 1, progress = 0, data = immigration)
+```
+
+**Which effect(s), if any, is/are significant? What can we say about this relationship? Do you think this is a reasonable model? Why or why not?**
+
+$d_M$: Those in the low similarity and third-person voice conditions were expected to be 2.93 units in identification, $d_M = 2.93, t = 29.35, p < .001$.
+
+$a_1$: Those in the high similarity condition (i.e., $X=1$) were 0.09 units lower in identification with the immigrant than the low similarity condition when they were in the third-person voice condition (i.e., $W=0$). This effect was not significant, $a_1 = -0.09, t = -0.63, p = .528$.
+
+$a_2$: Those in the first-person voice condition (i.e., $W=1$) were 0.35 units *lower* in identification than the third-person condition when they were in the low similarity condition (i.e., $X=0$). This effect was significant, $a_2 = -0.35, t = -2.44, p = .015$.
+
+$a_3$: The effect of similarity on identification increased by 0.41 units when switching from the third- to first-person condition. This interaction effect was significant, $a_3 = 0.41, t = 2.04, p = .042$.
+
+$d_Y$: Positive feeling toward the immigrant were expected to be 23.80 units when they were in the third-person voice condition, low similarity condition, and identification with the immigrant was 0, $d_Y = 23.80, t = 6.15, p < .001$.
+
+$b$: For each one-unit increase in identification, positive feelings were expected to increase by 9.47 units, regardless of what similarity or voice condition they were in. This effect was significant, $b = 9.47, t = 8.81, p = < .001$.
+
+$c'_{1_{X}}$: Controlling for identification with the immigrant, those in the high similarity condition (i.e., $X = 1$) were 3.60 units *lower* in positive feelings toward the immigrant compared to the low similarity condition when they were in the third-person voice condition (i.e., $W=0$). This effect was not significant, $c'_{1_{X}} = -3.60, t = -1.13, p =.258$.
+
+$c'_{2_{W}}$: Controlling for identification with the immigrant, those in the first-person voice condition (i.e., $W=1$) were 1.24 units *lower* in positive feelings toward the immigrant compared to the third-person voice condition when they were in the low similarity condition (i.e., $X=0$). This effect was not significant, $c'_{2_{W}} = -1.25, t = -0.39, p =.700$.
+
+$c'_{3_{XW}}$: Controlling for identification with the immigrant, the effect of similarity increased by 8.68 units when switching from the third- to first-person voice condition. This interaction effect was not significant, $c'_{3_{XW}} = 8.68, t = 1.91, p =.057$.
+
+$a_3b$: The ICIE was statistically significant. The indirect effect of similarity on feelings toward the immigrant through identification was 3.87 units higher in the first-person voice condition than the third-person voice condition. The ICIE was significant, $a_3b = 3.87$, 95% percentile bootstrap CI = $[0.113, 7.978]$.
+
+Based on the above pattern of results, we have evidence of a first-stage conditional indirect effect of similarity on positive feelings through identification where the effect of similarity on identification is conditional on whether the story is a first-person account. This conditional change in the mediator then increased the positive feelings toward the immigrant.
+
+This model seems to make sense, as more personal stories from someone similar to you may help you identify more with them, which, in-turn, may make you view them more favorably. To fully understand this effect, however, we must probe the conditional indirect effect in the next section.
+
+## Probing Conditional Indirect Effects
+
+Now that we have some evidence of interaction, let's probe the significant interaction effect using the techniques we've learned to this point. As always, you can do this manually or (much easier) using PROCESS.
+
+### Spotlight Analysis (Additive)
+
+#### Pick-a-Point for Individual Paths
+
+**Report the simple effects for the** $a$ **path and whether they were significant.**
+
+From the PROCESS output, we can see that the simple effect for similarity was not significant for the third-person narrative condition, but it was for the first-person narrative condition. This means the identification only increased when the story was written in first-person.
+
+**Create a plot for the simple effects for the** $a$ **path.**
+
+We will create a plot of the moderation of the $a$ path. Since $X$ and $W$ are dichotomous, we will have a line graph for the two groups values on $Y$. PROCESS creates a plot for this by default, but we will make it more publication ready. Let's access that plot data from the earlier process command...
+
+```{r}
+# refresher, uncomment if needed
+#process(x = "similar", m = "ident", y = "feeling", w = "voice", boot = 10000, model = 8, seed = 489, plot = 1, progress = 0, data = immigration)
+
+# create a data frame with the plot data from PROCESS
+plot_dat = data.frame(Similarity = factor(c("Low Similarity","High Similarity","Low Similarity","High Similarity"), levels = c("Low Similarity", "High Similarity")), Voice = factor(c("Third-Person Voice", "Third-Person Voice", "First-Person Voice", "First-Person Voice"),levels = c("Third-Person Voice", "First-Person Voice")), Feelings = c(2.9308, 2.8415, 2.5833, 2.9032))
+
+# create the plotting data manually
+# create a data frame with x and w values
+manual_plot_dat = data.frame(similar = c(0,1,0,1), voice = c(0,0,1,1))
+# generate predictions
+manual_plot_dat$feeling = predict(m_mod, manual_plot_dat)
+
+# prep full data for plot by making groups ordered factors
+immigration$similar_f = factor(ifelse(immigration$similar == 1, "High Similarity", "Low Similarity"), levels = c("Low Similarity", "High Similarity"))
+immigration$voice_f = factor(ifelse(immigration$voice == 1, "First-Person Voice", "Third-Person Voice"), levels = c("Third-Person Voice", "First-Person Voice"))
+
+# now, create the plot
+ggplot() + 
+  # add raw data, make spread small and light in color
+  geom_jitter(data = immigration, aes(x = voice_f, y = ident, color = similar_f), alpha = .2, width = 0.15, height = .15) + 
+  # add points for group means
+  geom_point(data = plot_dat, aes(x = Voice, y = Feelings, fill = Similarity, group = Similarity), size = 3, shape = 21, color = "black") +
+  # add lines to connect group means
+  geom_line(data = plot_dat, aes(x = Voice, y = Feelings, color = Similarity, group = Similarity), linewidth = 1) + 
+  # change legend information 
+  scale_color_manual(name = "Similarity to Participant (X)", values = c("#335566","coral")) +
+  scale_fill_manual(values = c("#335566", "coral"), guide = "none") +
+  # change labels
+  labs(y = "Identification with Immigrant (M)", x = "Narrative Perspective (W)",color = "Similarity to Participant (X)") + 
+  # make APA format and keep legend
+  jtools::theme_apa(legend.use.title = TRUE)
+```
+
+From this plot, it is evident that higher similarity to the participant is more important for first-person narratives. This is the "most personal" they can be with the immigrant, and led to the strongest identification overall.
+
+**What about the direct effect? Create a plot and report/interpret the simple effects if the moderation of the direct effect is significant.**
+
+We will not create a plot for the moderation of the direct effect since it was not significant, but it would largely follow the same procedure as above.
+
+**Create a plot for the** $b$ **path so that we could create a comprehensive diagram of the conditional indirect effect.**
+
+```{r}
+ggplot(data = immigration, aes(x = ident, y = feeling)) + 
+  geom_point(color = "firebrick4", position = "jitter") + 
+  labs(x = "Identification with the Immigrant (M)", y = "Feelings Toward the Immigrant (Y)") +
+  geom_smooth(method = "lm", color = "black") +
+  geom_rug(sides = "tr", outside = TRUE, position = "jitter") +
+  coord_cartesian(clip = "off") +
+  jtools::theme_apa()
+```
+
+At the simple relationship level, identification with the immigrant leads to more positive feelings toward them. (Note: This is not a plot of the actual multiple regression for the $b$ path.)
+
+#### Pick-a-Point for the Conditional Indirect Effect
+
+**Report the simple conditional indirect effects and whether they were significant.**
+
+The value of the conditional indirect effect in the third-person voice condition was not statistically significant, simple CIE = $0.845$, 95% percentile bootstrap CI = $[-3.566, 1.760]$.
+
+The value of the conditional indirect effect in the first-person voice condition was $3.028$ Similarity increased feelings by $3.028$ units through identification with the immigrant in the first-person voice condition. This simple conditional indirect effect was significant, 95% percentile bootstrap CI = $[0.342, 5.952]$.
+
+The above values were taken from the PROCESS output, but we can generate them from our manual bootstrapping algorithm earlier.
+
+```{r}
+# remember, a first-stage conditional indirect effect is (a1 + a3W)b
+# third-person voice, where w = 0
+simp_CIE_low_w = (bsa1 + bsa3*0)*bsb
+quantile(simp_CIE_low_w, c(.025, .975))
+# first-person voice, where w = 1
+simp_CIE_high_w = (bsa1 + bsa3*1)*bsb
+quantile(simp_CIE_high_w, c(.025, .975))
+```
+
+Slightly different values because of the slightly different bootstrapping algorithm, but we reach the same substantive conclusions about which one(s) to reject the null for.
+
+### The Approximate Johnson-Neyman
+
+**Can we conduct the Approximate Johsnon-Neyman here?** **If so, report the results.**
+
+There is no way to conduct the approximate Johnson-Neyman technique since both $X$ and $W$ are dichotomous.
+
+## Summary
+
+People are warmer toward those they understand and empathize with. When someone appears similar to us, we may identify with them more, which in turn makes us like them more. This is especially true when that person is made real (e.g., through a first-person narrative account) than when they seem more distant (e.g., through a third-person narrative account). It is important that we don't fall victim to others' attempts to dehumanize others, as we may be letting our perceptions of others be skewed by simple changes in wording of perceived similarity.
+
+## End of Script
